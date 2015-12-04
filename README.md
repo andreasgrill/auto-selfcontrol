@@ -19,6 +19,7 @@ You can plan for every weekday if and when SelfControl should start and stop.
 - Delete the installation directory of Auto-SelfControl
 - Execute the following command in the Terminal.app:
 ```
+sudo launchctl unload -w /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist
 sudo rm /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist
 ```
 
