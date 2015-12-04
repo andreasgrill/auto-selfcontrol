@@ -1,12 +1,25 @@
 # Auto-SelfControl
 
-OSX utility to automatically start / stop [SelfControl](http://selfcontrolapp.com).
+Small utility to schedule start and stop times of [SelfControl](http://selfcontrolapp.com).
+
+## What is it for?
+Auto-SelfControl helps you to create a weekly schedule for [SelfControl](http://selfcontrolapp.com).
+You can plan for every weekday if and when SelfControl should start and stop.
+
 
 ## Install
-- Download Auto-SelfControl and copy/extract it to a directory on your Mac.
+- Download Auto-SelfControl and copy/extract it to a directory on your Mac (e.g. `~/auto-selfcontrol`).
 - Edit the config.json (see [Configuration](#Configuration) first).
 - Open Terminal.app and cd to the directory.
 - Execute `sudo python auto-selfcontrol.py` to install Auto-SelfControl with the block-schedule defined in [config.json](config.json). __Important:__ If you change [config.json](config.json) later, you have to call the installation command again or Auto-SelfControl might not start at the right time!
+
+
+## Uninstall
+- Delete the installation directory of Auto-SelfControl
+- Execute the following command in the Terminal.app:
+```
+sudo rm /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist
+```
 
 ## Configuration
 The following listing shows an example config.json file that blocks reddit.com and youtube.com every Monday from 9am to 5.30pm and netflix.com on every Tuesday from 10am to 4pm:
@@ -80,7 +93,3 @@ The following listing shows another example without custom blacklists that block
         ]
     }
 ```
-
-## Uninstall
-- Delete the installation directory of Auto-SelfControl
-- Execute in the Terminal.app `sudo rm /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist`
