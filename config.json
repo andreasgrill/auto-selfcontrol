@@ -1,0 +1,16 @@
+{
+    "username": "andi",
+    "block-schedules":[
+        {
+            "weekday": 5,
+            "start-hour": 22,
+            "start-minute": 55,
+            "end-hour": 22,
+            "end-minute": 56,
+            "block-as-whitelist": false,
+            "host-blacklist": null
+        }
+    ],
+    "selfcontrol-path": "/Applications/SelfControl.app",
+    "legacy-mode": true
+}
