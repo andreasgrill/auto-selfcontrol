@@ -1,16 +1,70 @@
 {
-    "username": "andi",
+    "username": "MY_USERNAME",
+    "selfcontrol-path": "/Applications/SelfControl.app",
+    "legacy-mode": true,
     "block-schedules":[
         {
+            "weekday": 1,
+            "start-hour": 8,
+            "start-minute": 0,
+            "end-hour": 17,
+            "end-minute": 0,
+            "block-as-whitelist": false,
+            "host-blacklist": null
+        },
+        {
+            "weekday": 2,
+            "start-hour": 8,
+            "start-minute": 0,
+            "end-hour": 17,
+            "end-minute": 0,
+            "block-as-whitelist": false,
+            "host-blacklist": null
+        },
+        {
+            "weekday": 3,
+            "start-hour": 8,
+            "start-minute": 0,
+            "end-hour": 17,
+            "end-minute": 0,
+            "block-as-whitelist": false,
+            "host-blacklist": null
+        },
+        {
+            "weekday": 4,
+            "start-hour": 8,
+            "start-minute": 0,
+            "end-hour": 17,
+            "end-minute": 0,
+            "block-as-whitelist": false,
+            "host-blacklist": null
+        },
+        {
             "weekday": 5,
-            "start-hour": 22,
-            "start-minute": 55,
-            "end-hour": 22,
-            "end-minute": 56,
+            "start-hour": 8,
+            "start-minute": 0,
+            "end-hour": 17,
+            "end-minute": 0,
+            "block-as-whitelist": false,
+            "host-blacklist": null
+        },
+        {
+            "weekday": 6,
+            "start-hour": 8,
+            "start-minute": 0,
+            "end-hour": 17,
+            "end-minute": 0,
+            "block-as-whitelist": false,
+            "host-blacklist": null
+        },
+        {
+            "weekday": 7,
+            "start-hour": 8,
+            "start-minute": 0,
+            "end-hour": 17,
+            "end-minute": 0,
             "block-as-whitelist": false,
             "host-blacklist": null
         }
-    ],
-    "selfcontrol-path": "/Applications/SelfControl.app",
-    "legacy-mode": true
+    ]
 }
