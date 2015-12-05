@@ -89,10 +89,9 @@ def create_launchscript(config):
         </array>
         <key>StartCalendarInterval</key>
         <array>
-            {startintervals}
-        </array>
+            {startintervals}</array>
     </dict>
-    </plist>'''.format(path=os.path.realpath(__file__), startintervals="\n".join(get_launchscript_startintervals(config)))
+    </plist>'''.format(path=os.path.realpath(__file__), startintervals="".join(get_launchscript_startintervals(config)))
 
 def get_launchscript_startintervals(config):
     for schedule in config["block-schedules"]:
@@ -103,7 +102,8 @@ def get_launchscript_startintervals(config):
                 <integer>{startminute}</integer>
                 <key>Hour</key>
                 <integer>{starthour}</integer>
-            </dict>'''.format(weekday=schedule["weekday"], startminute=schedule['start-minute'], starthour=schedule['start-hour']))
+            </dict>
+            '''.format(weekday=schedule["weekday"], startminute=schedule['start-minute'], starthour=schedule['start-hour']))
 
 
 
