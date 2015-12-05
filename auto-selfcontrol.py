@@ -49,6 +49,7 @@ def run(config):
     syslog.syslog(syslog.LOG_ALERT, "SelfControl started for {min} minute(s).".format(min = duration))
 
 def is_schedule_active(schedule):
+    """ checks if we are right now in the provided schedule or not """
     currenttime = datetime.datetime.today()
     starttime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, schedule["start-hour"], schedule["start-minute"])
     endtime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, schedule["end-hour"], schedule["end-minute"])
@@ -60,12 +61,14 @@ def is_schedule_active(schedule):
         return starttime <= currenttime
 
 def get_duration_minutes(endhour, endminute):
+    """ returns the minutes left until the schedule's end-hour and end-minute are reached """
     currenttime = datetime.datetime.today()
     endtime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, endhour, endminute)
     d = endtime - currenttime
     return int(round(d.seconds / 60.0))
 
 def set_selfcontrol_setting(key, value, username):
+    """ sets a single default setting of SelfControl for the provied username """
     NSUserDefaults.resetStandardUserDefaults()
     originalUID = os.geteuid()
     os.seteuid(getpwnam(username).pw_uid)
@@ -74,7 +77,8 @@ def set_selfcontrol_setting(key, value, username):
     NSUserDefaults.resetStandardUserDefaults()
     os.seteuid(originalUID)
 
-def create_launchscript(config):
+def get_launchscript(config):
+    """ returns the string of the launchscript """
     return '''<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
     <plist version="1.0">
@@ -94,6 +98,7 @@ def create_launchscript(config):
     </plist>'''.format(path=os.path.realpath(__file__), startintervals="".join(get_launchscript_startintervals(config)))
 
 def get_launchscript_startintervals(config):
+    """ returns the string of the launchscript start intervals """
     for schedule in config["block-schedules"]:
         yield ('''<dict>
                 <key>Weekday</key>
@@ -111,7 +116,7 @@ def install(config):
     """ installs auto-selfcontrol """
     launchplist_path = "/Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist"
 
-    launchplist_script = create_launchscript(config)
+    launchplist_script = get_launchscript(config)
     
     with open(launchplist_path, 'w') as myfile:
         myfile.write(launchplist_script)
