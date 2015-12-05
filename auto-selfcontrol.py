@@ -119,6 +119,8 @@ def get_launchscript(config):
         <key>StartCalendarInterval</key>
         <array>
             {startintervals}</array>
+        <key>RunAtLoad</key>
+        <true/>
     </dict>
     </plist>'''.format(path=os.path.realpath(__file__), startintervals="".join(get_launchscript_startintervals(config)))
 
