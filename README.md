@@ -61,13 +61,13 @@ The following listing shows an example config.json file that blocks reddit.com a
 - _legacy-mode_ is at the moment always required to be true, but might be omitted in future versions of SelfControl.
 - _block-schedules_ contains a list of schedules when SelfControl should be started. 
     * The _weekday_ settings specifies the day of the week when SelfControl should get started. Possible values are from 1 (Monday) to 7 (Sunday). 
-    * _start-hour_ and _start-minute_ denote the time of the day when the blocking should start, while _end-hour_ and _end-minute_ specify the time it should end. If the ending time is before the start time, the block will last until the next day (see example below).
+    * _start-hour_ and _start-minute_ denote the time of the day when the blocking should start, while _end-hour_ and _end-minute_ specify the time it should end. The hours must be defined in the 24 hour digit format. If the ending time is before the start time, the block will last until the next day (see example below).
     * _block-as-whitelist_ specifies whether a whitelist or blacklist blocking (the latter is recommended) should be used.
     * Finally, _host-blacklist_ contains the list of sites that should get blacklisted. However, this last setting is optional and should be omitted if all schedules should block the same list of sites. In this case it is recommended to use SelfControl directly to create a blacklist and set this setting to `null` in the config.json file.
 
     Please note that it is possible to create multiple schedules on the same day, as long as they are not overlapping. Have a look at the example below.
 
-The following listing shows another example without custom blacklists that blocks every Sunday from 11pm til Monday 5am and from Monday 9am until 7pm:
+The following listing shows another example without custom blacklists that blocks every Sunday from 11pm til Monday 5am, Monday from 9am until 7pm and Monday from 10pm to 11pm:
 ```
     {
         "username": "MY_USERNAME",
@@ -79,6 +79,15 @@ The following listing shows another example without custom blacklists that block
                 "start-hour": 9,
                 "start-minute": 0,
                 "end-hour": 19,
+                "end-minute": 0,
+                "block-as-whitelist": false,
+                "host-blacklist": null
+            },
+            {
+                "weekday": 1,
+                "start-hour": 22,
+                "start-minute": 0,
+                "end-hour": 23,
                 "end-minute": 0,
                 "block-as-whitelist": false,
                 "host-blacklist": null
