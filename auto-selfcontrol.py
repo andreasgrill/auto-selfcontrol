@@ -26,9 +26,10 @@ def load_config(config_files):
 
 def run(config):
     """ starts self-control with custom parameters, depending on the weekday and the config """
-    weekday = datetime.datetime.today().isoweekday()
 
-    schedule = next(s for s in config["block-schedules"] if weekday % 7 == s["weekday"] % 7 and is_schedule_active(s))
+    check_if_running(config["username"])
+    
+    schedule = next(s for s in config["block-schedules"] if is_schedule_active(s))
     duration = get_duration_minutes(schedule["end-hour"], schedule["end-minute"])
 
     set_selfcontrol_setting("BlockDuration", duration, config["username"])
@@ -48,17 +49,28 @@ def run(config):
 
     syslog.syslog(syslog.LOG_ALERT, "SelfControl started for {min} minute(s).".format(min = duration))
 
+def check_if_running(username):
+    """ checks if self-control is already running and stops auto-selfcontrol if so. """
+    defaults = get_selfcontrol_settings(username)
+    if not NSDate.distantFuture().isEqualToDate_(defaults["BlockStartedDate"]):
+        syslog.syslog(syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
+        exit(2)
+
 def is_schedule_active(schedule):
     """ checks if we are right now in the provided schedule or not """
     currenttime = datetime.datetime.today()
     starttime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, schedule["start-hour"], schedule["start-minute"])
     endtime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, schedule["end-hour"], schedule["end-minute"])
     d = endtime - starttime
-     
-    if d.days == 0:
-        return starttime <= currenttime and endtime >= currenttime
-    else:
-        return starttime <= currenttime
+
+    weekday_diff = currenttime.isoweekday() % 7 - schedule["weekday"] % 7 
+
+    if weekday_diff == 0:
+        return starttime <= currenttime and endtime >= currenttime if d.days == 0 else starttime <= currenttime
+    elif weekday_diff == 1 or weekday_diff == -6:
+        return d.days != 0 and endtime >= currenttime
+    
+    return False
 
 def get_duration_minutes(endhour, endminute):
     """ returns the minutes left until the schedule's end-hour and end-minute are reached """
@@ -76,6 +88,19 @@ def set_selfcontrol_setting(key, value, username):
     CFPreferencesAppSynchronize("org.eyebeam.SelfControl")
     NSUserDefaults.resetStandardUserDefaults()
     os.seteuid(originalUID)
+
+def get_selfcontrol_settings(username):
+    """ returns all default settings of SelfControl for the provided username """
+    NSUserDefaults.resetStandardUserDefaults()
+    originalUID = os.geteuid()
+    os.seteuid(getpwnam(username).pw_uid)
+    defaults = NSUserDefaults.standardUserDefaults()
+    defaults.addSuiteNamed_("org.eyebeam.SelfControl")
+    defaults.synchronize()
+    result = defaults.dictionaryRepresentation()
+    NSUserDefaults.resetStandardUserDefaults()
+    os.seteuid(originalUID)
+    return result
 
 def get_launchscript(config):
     """ returns the string of the launchscript """
