@@ -23,7 +23,7 @@ sudo rm /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist
 ```
 
 ## Configuration
-The following listing shows an example config.json file that blocks reddit.com and youtube.com every Monday from 9am to 5.30pm and netflix.com on every Tuesday from 10am to 4pm:
+The following listing shows an example config.json file that blocks every Monday from 9am to 5.30pm and on every Tuesday from 10am to 4pm:
 ```
     {
         "username": "MY_USERNAME",
@@ -37,10 +37,7 @@ The following listing shows an example config.json file that blocks reddit.com a
                 "end-hour": 17,
                 "end-minute": 30,
                 "block-as-whitelist": false,
-                "host-blacklist": [
-                    "reddit.com",
-                    "youtube.com"
-                ]
+                "host-blacklist": null
             },
             {
                 "weekday": 2,
@@ -49,9 +46,7 @@ The following listing shows an example config.json file that blocks reddit.com a
                 "end-hour": 16,
                 "end-minute": 0,
                 "block-as-whitelist": false,
-                "host-blacklist": [
-                    "netflix.com"
-                ]
+                "host-blacklist": null
             }
         ]
     }
@@ -63,7 +58,7 @@ The following listing shows an example config.json file that blocks reddit.com a
     * The _weekday_ settings specifies the day of the week when SelfControl should get started. Possible values are from 1 (Monday) to 7 (Sunday). 
     * _start-hour_ and _start-minute_ denote the time of the day when the blocking should start, while _end-hour_ and _end-minute_ specify the time it should end. The hours must be defined in the 24 hour digit format. If the ending time is before the start time, the block will last until the next day (see example below).
     * _block-as-whitelist_ specifies whether a whitelist or blacklist blocking (the latter is recommended) should be used.
-    * Finally, _host-blacklist_ contains the list of sites that should get blacklisted. However, this last setting is optional and should be omitted if all schedules should block the same list of sites. In this case it is recommended to use SelfControl directly to create a blacklist and set this setting to `null` in the config.json file.
+    * Finally, _host-blacklist_ may either contain the list of sites that should get blacklisted as a string array or null if the current blacklist should be used. The setting should be left `null` if all schedules should block the same list of sites. In this case it is recommended to use SelfControl directly to create a blacklist.
 
     Please note that it is possible to create multiple schedules on the same day, as long as they are not overlapping. Have a look at the example below.
 
