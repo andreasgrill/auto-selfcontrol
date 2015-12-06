@@ -141,14 +141,21 @@ def get_launchscript_startintervals(config):
 
 def install(config):
     """ installs auto-selfcontrol """
+    print("> Start installation of Auto-SelfControl")
+
     launchplist_path = "/Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist"
 
+    # Check for existing plist
+    if os.path.exists(launchplist_path):
+        print("> Removed previous installation files")
+        subprocess.call(["launchctl", "unload", "-w", launchplist_path])
+        os.unlink(launchplist_path)
+    
     launchplist_script = get_launchscript(config)
     
     with open(launchplist_path, 'w') as myfile:
         myfile.write(launchplist_script)
 
-    subprocess.call(["launchctl", "unload", "-w", launchplist_path])
     subprocess.call(["launchctl", "load", "-w", launchplist_path])
 
     print("> Installed\n")
