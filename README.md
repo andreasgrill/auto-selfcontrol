@@ -99,3 +99,9 @@ The following listing shows another example without custom blacklists that block
         ]
     }
 ```
+
+## Troubleshooting
+
+1. ImportError: No module named Foundation
+
+If you've installed python using homebrew you'll need to run `pip install pyobjc` or [there are other options](https://stackoverflow.com/questions/1614648/importerror-no-module-named-foundation#1616361).
