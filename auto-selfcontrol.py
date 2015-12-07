@@ -29,7 +29,12 @@ def run(config):
 
     check_if_running(config["username"])
     
-    schedule = next(s for s in config["block-schedules"] if is_schedule_active(s))
+    try:
+        schedule = next(s for s in config["block-schedules"] if is_schedule_active(s))
+    except StopIteration:
+        syslog.syslog(syslog.LOG_ALERT, "No schedule is active at the moment. Shutting down.")
+        exit(0)
+
     duration = get_duration_minutes(schedule["end-hour"], schedule["end-minute"])
 
     set_selfcontrol_setting("BlockDuration", duration, config["username"])
