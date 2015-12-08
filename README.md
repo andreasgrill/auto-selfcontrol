@@ -9,6 +9,7 @@ You can plan for every weekday if and when SelfControl should start and stop.
 
 ## Install
 - [SelfControl](http://selfcontrolapp.com) is required and should be installed in the application directory (however, custom paths are also supported).
+- Start [SelfControl](http://selfcontrolapp.com) and export your blacklist as it might get overridden by Auto-SelfControl.
 - Download Auto-SelfControl and copy/extract it to a directory on your Mac (e.g. `~/auto-selfcontrol`).
 - Edit the config.json (see [Configuration](#configuration) first).
 - Open Terminal.app and cd to the directory.
@@ -58,7 +59,7 @@ The following listing shows an example config.json file that blocks every Monday
 - _username_ should be the Mac OS X username.
 - _selfcontrol-path_ is the absolute path to [SelfControl](http://selfcontrolapp.com).
 - _legacy-mode_ is at the moment always required to be true, but might be omitted in future versions of SelfControl.
-- _host-blacklist_ may either contain the list of sites that should get blacklisted as a string array (recommended) or `null` if SelfControl's blacklist should be used. It is also possible to blacklist different sites on different schedules, which is described in the _block-schedules_ setting.
+- _host-blacklist_ may either contain the list of sites that should get blacklisted as a string array (recommended) or `null` if SelfControl's blacklist should be used. It is also possible to blacklist different sites on different schedules, which is described in the _block-schedules_ setting. Please note that the blacklist in SelfControl might get overridden anyway and should be backed up before using Auto-SelfControl.
 __Important:__ Because of a bug in Auto-SelfControl ([Issue #3](https://github.com/andreasgrill/auto-selfcontrol/issues/3)) it is not recommended to use SelfControl's blacklist directly (`"host-blacklist": null`), as changes in the blacklist may not be permanently saved. A workaround for this issue is to either add new sites to SelfControl while the blocking is active ("Add to Blacklist") or manually start the blocking after the blacklist was changed.
 - _block-schedules_ contains a list of schedules when SelfControl should be started.
     * The _weekday_ settings specifies the day of the week when SelfControl should get started. Possible values are from 1 (Monday) to 7 (Sunday). If the setting is `null` or omitted the blocking will be scheduled for all week days.
