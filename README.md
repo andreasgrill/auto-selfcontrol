@@ -32,7 +32,7 @@ The following listing shows an example config.json file that blocks every Monday
         "host-blacklist": [
             "twitter.com",
             "reddit.com"
-        ]
+        ],
         "block-schedules":[
             {
                 "weekday": 1,
