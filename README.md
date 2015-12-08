@@ -78,7 +78,7 @@ The following listing shows another example that blocks twitter and reddit every
         "host-blacklist":[
             "twitter.com",
             "reddit.com"
-        ]
+        ],
         "block-schedules":[
             {
                 "weekday": 1,
