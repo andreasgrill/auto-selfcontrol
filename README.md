@@ -29,6 +29,10 @@ The following listing shows an example config.json file that blocks every Monday
         "username": "MY_USERNAME",
         "selfcontrol-path": "/Applications/SelfControl.app",
         "legacy-mode": true,
+        "host-blacklist": [
+            "twitter.com",
+            "reddit.com"
+        ]
         "block-schedules":[
             {
                 "weekday": 1,
@@ -54,29 +58,33 @@ The following listing shows an example config.json file that blocks every Monday
 - _username_ should be the Mac OS X username.
 - _selfcontrol-path_ is the absolute path to [SelfControl](http://selfcontrolapp.com).
 - _legacy-mode_ is at the moment always required to be true, but might be omitted in future versions of SelfControl.
-- _block-schedules_ contains a list of schedules when SelfControl should be started. 
-    * The _weekday_ settings specifies the day of the week when SelfControl should get started. Possible values are from 1 (Monday) to 7 (Sunday). 
+- _host-blacklist_ may either contain the list of sites that should get blacklisted as a string array (recommended) or `null` if SelfControl's blacklist should be used. It is also possible to blacklist different sites on different schedules, which is described in the _block-schedules_ setting.
+__Important:__ Because of a bug in Auto-SelfControl ([Issue #3](https://github.com/andreasgrill/auto-selfcontrol/issues/3)) it is not recommended to use SelfControl's blacklist directly (`"host-blacklist": null`), as changes in the blacklist may not be permanently saved. A workaround for this issue is to either add new sites to SelfControl while the blocking is active ("Add to Blacklist") or manually start the blocking after the blacklist was changed.
+- _block-schedules_ contains a list of schedules when SelfControl should be started.
+    * The _weekday_ settings specifies the day of the week when SelfControl should get started. Possible values are from 1 (Monday) to 7 (Sunday). If the setting is `null` or omitted the blocking will be scheduled for all week days.
     * _start-hour_ and _start-minute_ denote the time of the day when the blocking should start, while _end-hour_ and _end-minute_ specify the time it should end. The hours must be defined in the 24 hour digit format. If the ending time is before the start time, the block will last until the next day (see example below).
     * _block-as-whitelist_ specifies whether a whitelist or blacklist blocking (the latter is recommended) should be used.
-    * Finally, _host-blacklist_ may either contain the list of sites that should get blacklisted as a string array or `null` if the current blacklist should be used. The setting should be left `null` if all schedules should block the same list of sites. In this case it is recommended to use SelfControl directly to create a blacklist. __Important:__ Because of a bug in Auto-SelfControl ([Issue #3](https://github.com/andreasgrill/auto-selfcontrol/issues/3)) changes in the blacklist are only permanently saved if SelfControl is manually run (or running at the moment) once with the changed blacklist.
+    * Finally, _host-blacklist_ may either contain the list of sites that should get blacklisted in this specific schedule as a string array, or `null` if the general _host-blacklist_ setting applies for this schedule too. The setting should be left `null` if all schedules should block the same list of sites.
 
     Please note that it is possible to create multiple schedules on the same day, as long as they are not overlapping. Have a look at the example below.
 
-The following listing shows another example without custom blacklists that blocks every Sunday from 11pm til Monday 5am, Monday from 9am until 7pm and Monday from 10pm to 11pm:
+The following listing shows another example that blocks twitter and reddit every Sunday from 11pm til Monday 5am and Monday from 9am until 7pm, while additionally blocking netflix every Monday from 10pm to 11pm:
 ```
     {
         "username": "MY_USERNAME",
         "selfcontrol-path": "/Applications/SelfControl.app",
         "legacy-mode": true,
+        "host-blacklist":[
+            "twitter.com",
+            "reddit.com"
+        ]
         "block-schedules":[
             {
                 "weekday": 1,
                 "start-hour": 9,
                 "start-minute": 0,
                 "end-hour": 19,
-                "end-minute": 0,
-                "block-as-whitelist": false,
-                "host-blacklist": null
+                "end-minute": 0
             },
             {
                 "weekday": 1,
@@ -84,17 +92,18 @@ The following listing shows another example without custom blacklists that block
                 "start-minute": 0,
                 "end-hour": 23,
                 "end-minute": 0,
-                "block-as-whitelist": false,
-                "host-blacklist": null
+                "host-blacklist":[
+                    "twitter.com",
+                    "reddit.com",
+                    "netflix.com"
+                ]
             },
             {
                 "weekday": 7,
                 "start-hour": 23,
                 "start-minute": 0,
                 "end-hour": 5,
-                "end-minute": 0,
-                "block-as-whitelist": false,
-                "host-blacklist": null
+                "end-minute": 0
             }
         ]
     }

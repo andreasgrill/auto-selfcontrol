@@ -38,9 +38,12 @@ def run(config):
     duration = get_duration_minutes(schedule["end-hour"], schedule["end-minute"])
 
     set_selfcontrol_setting("BlockDuration", duration, config["username"])
-    set_selfcontrol_setting("BlockAsWhitelist", 1 if schedule["block-as-whitelist"] else 0, config["username"])
-    if schedule["host-blacklist"] is not None:
+    set_selfcontrol_setting("BlockAsWhitelist", 1 if schedule.get("block-as-whitelist", False) else 0, config["username"])
+
+    if schedule.get("host-blacklist", None) is not None:
         set_selfcontrol_setting("HostBlacklist", schedule["host-blacklist"], config["username"])
+    elif config.get("host-blacklist", None) is not None:
+        set_selfcontrol_setting("HostBlacklist", config["host-blacklist"], config["username"])
 
     # In legacy mode manually set the BlockStartedDate, this should not be required anymore in future versions
     # of SelfControl.
@@ -68,12 +71,18 @@ def is_schedule_active(schedule):
     endtime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, schedule["end-hour"], schedule["end-minute"])
     d = endtime - starttime
 
-    weekday_diff = currenttime.isoweekday() % 7 - schedule["weekday"] % 7 
+    for weekday in list(schedule["weekday"]) if schedule.get("weekday", None) is not None else range(1,8):
+        weekday_diff = currenttime.isoweekday() % 7 - weekday % 7 
 
-    if weekday_diff == 0:
-        return starttime <= currenttime and endtime >= currenttime if d.days == 0 else starttime <= currenttime
-    elif weekday_diff == 1 or weekday_diff == -6:
-        return d.days != 0 and endtime >= currenttime
+        if weekday_diff == 0:
+            result = starttime <= currenttime and endtime >= currenttime if d.days == 0 else starttime <= currenttime
+        elif weekday_diff == 1 or weekday_diff == -6:
+            result = d.days != 0 and endtime >= currenttime
+        else:
+            result = False
+
+        if result:
+            return result
     
     return False
 
@@ -131,16 +140,18 @@ def get_launchscript(config):
 
 def get_launchscript_startintervals(config):
     """ returns the string of the launchscript start intervals """
+    entries = list()
     for schedule in config["block-schedules"]:
-        yield ('''<dict>
-                <key>Weekday</key>
-                <integer>{weekday}</integer>
-                <key>Minute</key>
-                <integer>{startminute}</integer>
-                <key>Hour</key>
-                <integer>{starthour}</integer>
-            </dict>
-            '''.format(weekday=schedule["weekday"], startminute=schedule['start-minute'], starthour=schedule['start-hour']))
+        for weekday in list(schedule["weekday"]) if schedule.get("weekday", None) is not None else range(1,8):
+            yield ('''<dict>
+                    <key>Weekday</key>
+                    <integer>{weekday}</integer>
+                    <key>Minute</key>
+                    <integer>{startminute}</integer>
+                    <key>Hour</key>
+                    <integer>{starthour}</integer>
+                </dict>
+                '''.format(weekday=weekday, startminute=schedule['start-minute'], starthour=schedule['start-hour']))
 
 
 

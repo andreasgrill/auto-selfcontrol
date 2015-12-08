@@ -2,6 +2,10 @@
     "username": "MY_USERNAME",
     "selfcontrol-path": "/Applications/SelfControl.app",
     "legacy-mode": true,
+    "host-blacklist": [
+        "twitter.com",
+        "reddit.com"
+    ],
     "block-schedules":[
         {
             "weekday": 1,
