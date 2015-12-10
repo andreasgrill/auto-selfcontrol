@@ -71,7 +71,7 @@ def is_schedule_active(schedule):
     endtime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, schedule["end-hour"], schedule["end-minute"])
     d = endtime - starttime
 
-    for weekday in list(schedule["weekday"]) if schedule.get("weekday", None) is not None else range(1,8):
+    for weekday in get_schedule_weekdays(schedule):
         weekday_diff = currenttime.isoweekday() % 7 - weekday % 7 
 
         if weekday_diff == 0:
@@ -92,6 +92,10 @@ def get_duration_minutes(endhour, endminute):
     endtime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, endhour, endminute)
     d = endtime - currenttime
     return int(round(d.seconds / 60.0))
+
+def get_schedule_weekdays(schedule):
+    """ returns a list of weekdays the specified schedule is active """
+    return list(schedule["weekday"]) if schedule.get("weekday", None) is not None else range(1,8)
 
 def set_selfcontrol_setting(key, value, username):
     """ sets a single default setting of SelfControl for the provied username """
@@ -142,7 +146,7 @@ def get_launchscript_startintervals(config):
     """ returns the string of the launchscript start intervals """
     entries = list()
     for schedule in config["block-schedules"]:
-        for weekday in list(schedule["weekday"]) if schedule.get("weekday", None) is not None else range(1,8):
+        for weekday in get_schedule_weekdays(schedule):
             yield ('''<dict>
                     <key>Weekday</key>
                     <integer>{weekday}</integer>
