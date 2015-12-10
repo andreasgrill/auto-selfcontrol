@@ -75,10 +75,13 @@ def is_schedule_active(schedule):
         weekday_diff = currenttime.isoweekday() % 7 - weekday % 7 
 
         if weekday_diff == 0:
+            # schedule's weekday is today
             result = starttime <= currenttime and endtime >= currenttime if d.days == 0 else starttime <= currenttime
         elif weekday_diff == 1 or weekday_diff == -6:
-            result = d.days != 0 and endtime >= currenttime
+            # schedule's weekday was yesterday
+            result = d.days != 0 and currenttime <= endtime
         else:
+            # schedule's weekday was on any other day.
             result = False
 
         if result:
