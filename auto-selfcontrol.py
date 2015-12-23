@@ -98,7 +98,7 @@ def get_duration_minutes(endhour, endminute):
 
 def get_schedule_weekdays(schedule):
     """ returns a list of weekdays the specified schedule is active """
-    return list(schedule["weekday"]) if schedule.get("weekday", None) is not None else range(1,8)
+    return [schedule["weekday"]] if schedule.get("weekday", None) is not None else range(1,8)
 
 def set_selfcontrol_setting(key, value, username):
     """ sets a single default setting of SelfControl for the provied username """
