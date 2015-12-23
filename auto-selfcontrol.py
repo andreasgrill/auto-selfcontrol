@@ -19,8 +19,15 @@ def load_config(config_files):
     config = dict()
 
     for f in config_files:
-        with open(f, 'rt') as cfg:
-            config.update(json.load(cfg))
+        try:
+            with open(f, 'rt') as cfg:
+                config.update(json.load(cfg))
+        except ValueError as e:
+            err = "The json config file {configfile} is not correctly formatted." \
+                  "The following exception was raised:\n{exc}".format(configfile=f, exc=e)
+            print(err)
+            syslog.syslog(syslog.LOG_ERR, err)
+            exit(9)
 
     return config
 
