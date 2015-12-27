@@ -29,7 +29,6 @@ The following listing shows an example config.json file that blocks every Monday
     {
         "username": "MY_USERNAME",
         "selfcontrol-path": "/Applications/SelfControl.app",
-        "legacy-mode": true,
         "host-blacklist": [
             "twitter.com",
             "reddit.com"
@@ -58,7 +57,6 @@ The following listing shows an example config.json file that blocks every Monday
 ```
 - _username_ should be the Mac OS X username.
 - _selfcontrol-path_ is the absolute path to [SelfControl](http://selfcontrolapp.com).
-- _legacy-mode_ is at the moment always required to be true, but might be omitted in future versions of SelfControl.
 - _host-blacklist_ contains the list of sites that should get blacklisted as a string array. It is also possible to blacklist different sites on different schedules, which is described in the _block-schedules_ setting. Please note that the blacklist in SelfControl might get overridden and should be __backed up__ before using Auto-SelfControl.
 - _block-schedules_ contains a list of schedules when SelfControl should be started.
     * The _weekday_ settings specifies the day of the week when SelfControl should get started. Possible values are from 1 (Monday) to 7 (Sunday). If the setting is `null` or omitted the blocking will be scheduled for all week days.
@@ -73,7 +71,6 @@ The following listing shows another example that blocks twitter and reddit every
     {
         "username": "MY_USERNAME",
         "selfcontrol-path": "/Applications/SelfControl.app",
-        "legacy-mode": true,
         "host-blacklist":[
             "twitter.com",
             "reddit.com"
