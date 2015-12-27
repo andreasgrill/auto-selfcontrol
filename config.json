@@ -1,7 +1,6 @@
 {
     "username": "MY_USERNAME",
     "selfcontrol-path": "/Applications/SelfControl.app",
-    "legacy-mode": true,
     "host-blacklist": [
         "twitter.com",
         "reddit.com"
@@ -12,63 +11,49 @@
             "start-hour": 8,
             "start-minute": 0,
             "end-hour": 17,
-            "end-minute": 0,
-            "block-as-whitelist": false,
-            "host-blacklist": null
+            "end-minute": 0
         },
         {
             "weekday": 2,
             "start-hour": 8,
             "start-minute": 0,
             "end-hour": 17,
-            "end-minute": 0,
-            "block-as-whitelist": false,
-            "host-blacklist": null
+            "end-minute": 0
         },
         {
             "weekday": 3,
             "start-hour": 8,
             "start-minute": 0,
             "end-hour": 17,
-            "end-minute": 0,
-            "block-as-whitelist": false,
-            "host-blacklist": null
+            "end-minute": 0
         },
         {
             "weekday": 4,
             "start-hour": 8,
             "start-minute": 0,
             "end-hour": 17,
-            "end-minute": 0,
-            "block-as-whitelist": false,
-            "host-blacklist": null
+            "end-minute": 0
         },
         {
             "weekday": 5,
             "start-hour": 8,
             "start-minute": 0,
             "end-hour": 17,
-            "end-minute": 0,
-            "block-as-whitelist": false,
-            "host-blacklist": null
+            "end-minute": 0
         },
         {
             "weekday": 6,
             "start-hour": 8,
             "start-minute": 0,
             "end-hour": 17,
-            "end-minute": 0,
-            "block-as-whitelist": false,
-            "host-blacklist": null
+            "end-minute": 0
         },
         {
             "weekday": 7,
             "start-hour": 8,
             "start-minute": 0,
             "end-hour": 17,
-            "end-minute": 0,
-            "block-as-whitelist": false,
-            "host-blacklist": null
+            "end-minute": 0
         }
     ]
 }
