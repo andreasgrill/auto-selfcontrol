@@ -9,7 +9,7 @@ You can plan for every weekday if and when SelfControl should start and stop.
 
 ## Install
 - [SelfControl](http://selfcontrolapp.com) is required and should be installed in the application directory (however, custom paths are also supported).
-- Start [SelfControl](http://selfcontrolapp.com) and export your blacklist as it might get overridden by Auto-SelfControl.
+- Start [SelfControl](http://selfcontrolapp.com) and backup your blacklist as it might get overridden by Auto-SelfControl.
 - Download Auto-SelfControl and copy/extract it to a directory on your Mac (e.g. `~/auto-selfcontrol`).
 - Edit the config.json (see [Configuration](#configuration) first).
 - Open Terminal.app and cd to the directory.
