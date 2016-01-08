@@ -206,7 +206,9 @@ def check_config(config):
         exit_with_error("No username specified in config.")
     if config["username"] not in get_osx_usernames():
         exit_with_error(
-                "Username {username} unknown. Please use your OSX username instead.".format(
+                "Username '{username}' unknown.\nPlease use your OSX username instead.\n" \
+                "If you have trouble finding it, just enter the command 'whoami'\n" \
+                "in your terminal.".format(
                         username=config["username"]))
     if not config.has_key("selfcontrol-path"):
         exit_with_error("The setting 'selfcontrol-path' is required and must point to the location of SelfControl.")
