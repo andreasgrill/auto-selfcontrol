@@ -60,7 +60,7 @@ The following listing shows an example config.json file that blocks every Monday
 
     Please note that it is possible to create multiple schedules on the same day, as long as they are not overlapping. Have a look at the example below.
 
-The following listing shows another example that blocks twitter and reddit every Sunday from 11pm til Monday 5am and Monday from 9am until 7pm, while additionally blocking netflix every Monday from 10pm to 11pm:
+The following listing shows another example that blocks twitter and reddit every Sunday from 11pm til Monday 5am, Monday from 9am until 7pm and Monday from 10pm to 11pm:
 ```
     {
         "username": "MY_USERNAME",
@@ -70,6 +70,13 @@ The following listing shows another example that blocks twitter and reddit every
             "reddit.com"
         ],
         "block-schedules":[
+            {
+                "weekday": 7,
+                "start-hour": 23,
+                "start-minute": 0,
+                "end-hour": 5,
+                "end-minute": 0
+            },
             {
                 "weekday": 1,
                 "start-hour": 9,
@@ -82,13 +89,6 @@ The following listing shows another example that blocks twitter and reddit every
                 "start-hour": 22,
                 "start-minute": 0,
                 "end-hour": 23,
-                "end-minute": 0
-            },
-            {
-                "weekday": 7,
-                "start-hour": 23,
-                "start-minute": 0,
-                "end-hour": 5,
                 "end-minute": 0
             }
         ]
