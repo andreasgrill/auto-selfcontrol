@@ -33,7 +33,9 @@ def load_config(config_files):
 def run(config):
     """ starts self-control with custom parameters, depending on the weekday and the config """
 
-    check_if_running(config["username"])
+    if check_if_running(config["username"]):
+        syslog.syslog(syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
+        exit(2)
 
     try:
         schedule = next(s for s in config["block-schedules"] if is_schedule_active(s))
@@ -66,11 +68,9 @@ def run(config):
 
 
 def check_if_running(username):
-    """ checks if self-control is already running and stops auto-selfcontrol if so. """
+    """ checks if self-control is already running. """
     defaults = get_selfcontrol_settings(username)
-    if not NSDate.distantFuture().isEqualToDate_(defaults["BlockStartedDate"]):
-        syslog.syslog(syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
-        exit(2)
+    return not NSDate.distantFuture().isEqualToDate_(defaults["BlockStartedDate"])
 
 
 def is_schedule_active(schedule):
@@ -270,3 +270,5 @@ if __name__ == "__main__":
     else:
         check_config(config)
         install(config)
+        if not check_if_running(config["username"]) and any(s for s in config["block-schedules"] if is_schedule_active(s)):
+            run(config)
