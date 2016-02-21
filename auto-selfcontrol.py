@@ -60,7 +60,7 @@ def run(config):
         set_selfcontrol_setting("BlockStartedDate", NSDate.date(), config["username"])
 
     # Start SelfControl
-    subprocess.call(["{path}/Contents/MacOS/org.eyebeam.SelfControl".format(path=config["selfcontrol-path"]),
+    subprocess.check_output(["{path}/Contents/MacOS/org.eyebeam.SelfControl".format(path=config["selfcontrol-path"]),
                      str(getpwnam(config["username"]).pw_uid),
                      "--install"])
 
@@ -271,4 +271,7 @@ if __name__ == "__main__":
         check_config(config)
         install(config)
         if not check_if_running(config["username"]) and any(s for s in config["block-schedules"] if is_schedule_active(s)):
+            print("> Active schedule found for SelfControl!")
+            print("> Start SelfControl (this could take a few minutes)\n")
             run(config)
+            print("\n> SelfControl was started.\n")
