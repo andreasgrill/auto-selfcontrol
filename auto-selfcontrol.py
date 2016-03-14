@@ -70,7 +70,7 @@ def run(config):
 def check_if_running(username):
     """ checks if self-control is already running. """
     defaults = get_selfcontrol_settings(username)
-    return not NSDate.distantFuture().isEqualToDate_(defaults["BlockStartedDate"])
+    return defaults.has_key("BlockStartedDate") and not NSDate.distantFuture().isEqualToDate_(defaults["BlockStartedDate"])
 
 
 def is_schedule_active(schedule):
