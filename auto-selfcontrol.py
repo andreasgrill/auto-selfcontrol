@@ -60,9 +60,7 @@ def run(config):
         set_selfcontrol_setting("BlockStartedDate", NSDate.date(), config["username"])
 
     # Start SelfControl
-    subprocess.check_output(["{path}/Contents/MacOS/org.eyebeam.SelfControl".format(path=config["selfcontrol-path"]),
-                     str(getpwnam(config["username"]).pw_uid),
-                     "--install"])
+    os.system("{path}/Contents/MacOS/org.eyebeam.SelfControl {userId} --install".format(path=config["selfcontrol-path"], userId=str(getpwnam(config["username"]).pw_uid)))
 
     syslog.syslog(syslog.LOG_ALERT, "SelfControl started for {min} minute(s).".format(min=duration))
 
