@@ -97,6 +97,10 @@ The following listing shows another example that blocks twitter and reddit every
 
 ## Troubleshooting
 
-1. ImportError: No module named Foundation
+### ImportError: No module named Foundation
 
-If you've installed python using homebrew you'll need to run `pip install pyobjc` or [there are other options](https://stackoverflow.com/questions/1614648/importerror-no-module-named-foundation#1616361).
+If you've installed Python using HomeBrew, you'll need to run Auto-SelfControl with the original Python installation from OS X:
+
+    sudo /usr/bin/python auto-selfcontrol.py
+    
+There are also other options, including installing `pyobjc` on your brewed Python (`pip install pyobjc`). [See this thread for alternative solutions](https://stackoverflow.com/questions/1614648/importerror-no-module-named-foundation#1616361).
