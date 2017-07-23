@@ -13,6 +13,7 @@ You can plan for every weekday if and when SelfControl should start and stop.
 - [Download Auto-SelfControl](../../archive/master.zip) and copy/extract it to a directory on your Mac (e.g. `~/auto-selfcontrol`).
 - Edit the config.json (see [Configuration](#configuration) first).
 - Open Terminal.app and navigate to the directory. (e.g. `cd ~/auto-selfcontrol`).
+- Ececute `python setup.py install` to install the packages required to run Auto-SeltControl.
 - Execute `sudo /usr/bin/python auto-selfcontrol.py` to install Auto-SelfControl with the block-schedule defined in [config.json](config.json). __Important:__ If you change [config.json](config.json) later, you have to call the installation command again or Auto-SelfControl might not start at the right time!
 
 
