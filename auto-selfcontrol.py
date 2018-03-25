@@ -248,7 +248,9 @@ def exit_with_error(message):
 
 
 if __name__ == "__main__":
-    __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    config_dir = os.path.realpath('/usr/local/etc/auto-selfcontrol')
+    config_file = os.path.join(config_dir, 'config.json')
+
     sys.excepthook = excepthook
 
     syslog.openlog("Auto-SelfControl")
@@ -261,7 +263,7 @@ if __name__ == "__main__":
     parser.add_option("-r", "--run", action="store_true",
                       dest="run", default=False)
     (opts, args) = parser.parse_args()
-    config = load_config([os.path.join(__location__, "config.json")])
+    config = load_config([config_file])
 
     if opts.run:
         run(config)
