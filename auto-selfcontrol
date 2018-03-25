@@ -20,18 +20,30 @@ More instructions at https://github.com/andreasgrill/auto-selfcontrol"
 
 if [[ $1 ]]; then
     case "$1" in
+        # Edit configuration file
         config|edit|set|conf*)
+            # If no "config.json" in /usr/local/etc/auto-selfcontrol/
             if [[ ! -f $CONFIG_FILE ]]; then
-                curl -L -s "https://raw.githubusercontent.com/andreasgrill/auto-selfcontrol/master/config.json" -o $CONFIG_FILE
-                echo "Downloaded sample configuration in $CONFIG_FILE"
+                # If existing "config.json" in the cwd, copy it
+                if [[ -f config.json ]]; then
+                    cp "config.json" $CONFIG_FILE
+                    echo "Copied config.json from the current directory to $CONFIG_FILE"
+                # else download sample config from github repository
+                else
+                    curl -L -s "https://raw.githubusercontent.com/andreasgrill/auto-selfcontrol/master/config.json" -o $CONFIG_FILE
+                    echo "Downloaded sample configuration in $CONFIG_FILE"
+                fi
             fi
             echo "Opening $CONFIG_FILE"
+            # Opening with default editor set as $EDITOR
             if [[ $EDITOR ]]; then
                 $EDITOR $CONFIG_FILE
+            # Or with default GUI text editor (txt files > Open with...)
             else
                 open -t $CONFIG_FILE
             fi
             ;;
+        # Install plist config
         activate|install)
             sudo /usr/bin/python auto-selfcontrol.py
             exit 0
