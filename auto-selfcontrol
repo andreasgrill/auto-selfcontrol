@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# Auto-SelfControl basic command-line interface
+
+CONFIG_FILE="/usr/local/etc/auto-selfcontrol/config.json"
+b=$(tput bold)
+n=$(tput sgr0)
+HELP_TEXT="Auto-SelfControl (c) Andreas Grill
+Small utility to schedule start and stop times of SelfControl.
+
+Usage: ${b}$(basename "$0") <config|activate|help>${n}
+
+where:
+  ${b}config${n}    Open the schedule configuration file in a text
+              editor to set up weekly parameters
+  ${b}activate${n}  Activate the automatic start/stop of SelfControl
+              according to schedules defined in configuration
+  ${b}help${n}      Show this help message
+
+More instructions at https://github.com/andreasgrill/auto-selfcontrol"
+
+if [[ $1 ]]; then
+    case "$1" in
+        config|edit|set|conf*)
+            if [[ ! -f $CONFIG_FILE ]]; then
+                curl -L -s "https://raw.githubusercontent.com/andreasgrill/auto-selfcontrol/master/config.json" -o $CONFIG_FILE
+                echo "Downloaded sample configuration in $CONFIG_FILE"
+            fi
+            echo "Opening $CONFIG_FILE"
+            if [[ $EDITOR ]]; then
+                $EDITOR $CONFIG_FILE
+            else
+                open -t $CONFIG_FILE
+            fi
+            ;;
+        activate|install)
+            sudo /usr/bin/python auto-selfcontrol.py
+            exit 0
+            ;;
+        -h|--help|help|*)
+            echo "$HELP_TEXT"
+            exit 0
+            ;;
+    esac
+else
+    echo "$HELP_TEXT"
+    exit 0
+fi
