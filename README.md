@@ -7,22 +7,56 @@ Auto-SelfControl helps you to create a weekly schedule for [SelfControl](http://
 You can plan for every weekday if and when SelfControl should start and stop.
 
 
-## Install
-- [SelfControl](http://selfcontrolapp.com) is required and should be installed in the application directory (however, custom paths are also supported).
-- Start SelfControl and backup your blacklist as it might get overridden by Auto-SelfControl.
-- [Download Auto-SelfControl](../../archive/master.zip) and copy/extract it to a directory on your Mac (e.g. `~/auto-selfcontrol`).
-- Edit the config.json (see [Configuration](#configuration) first).
-- Open Terminal.app and navigate to the directory. (e.g. `cd ~/auto-selfcontrol`).
-- Execute `/usr/bin/python setup.py install` to install the packages required to run Auto-SeltControl.
-- Execute `sudo /usr/bin/python auto-selfcontrol.py` to install Auto-SelfControl with the block-schedule defined in [config.json](config.json). __Important:__ If you change [config.json](config.json) later, you have to call the installation command again or Auto-SelfControl might not start at the right time!
+## Installation
+
+### With Homebrew (under construction)
+
+The easiest way to install Auto-SelfControl is with [Homebrew](https://brew.sh/). Install Auto-SelfControl by running the following command in the Terminal:
+
+    brew install auto-selfcontrol
+
+If you already have [SelfControl](http://selfcontrolapp.com), start it and **backup your blacklist** as it might get overridden by Auto-SelfControl. 
+
+If you do not have [SelfControl](http://selfcontrolapp.com) already installed on your system, you can install it with [Homebrew Cask](https://caskroom.github.io/):
+
+    brew cask install selfcontrol
+
+### Manual installation
+
+Download this repository to a directory on your system (e.g., `~/auto-selfcontrol/`).
+
+    chmod +x auto-selfcontrol
+
+Run from this specific repository
+
+    ./auto-selfcontrol <config|activate|help>
+
+Or create a symlink in your `/usr/local/bin` folder to access it from anywhere.
+
+## Usage
+
+Edit the time configuration (see [Configuration](#configuration)) first:
+
+    auto-selfcontrol config
+
+When your block-schedule in [config.json](config.json) is ready, activate it by running:
+
+    auto-selfcontrol activate
+
+__Important:__ If you change [config.json](config.json) later, you have to call the `auto-selfcontrol activate` command again or Auto-SelfControl will not take the modifications into account!
 
 
 ## Uninstall
-- Delete the installation directory of Auto-SelfControl
-- Execute the following command in the Terminal.app:
-```
-sudo rm /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist
-```
+
+To remove the application (if installed with Homebrew):
+
+    brew uninstall auto-selfcontrol
+
+Or, manually, by removing the directory where you installed the files.
+
+You also need to remove the automatic schedule by executing the following command in the Terminal:
+
+    sudo rm /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist
 
 ## Configuration
 The following listing shows an example config.json file that blocks every Monday from 9am to 5.30pm and on every Tuesday from 10am to 4pm:
@@ -52,7 +86,7 @@ The following listing shows an example config.json file that blocks every Monday
         ]
     }
 ```
-- _username_ should be the Mac OS X username.
+- _username_ should be the macOS username.
 - _selfcontrol-path_ is the absolute path to [SelfControl](http://selfcontrolapp.com).
 - _host-blacklist_ contains the list of sites that should get blacklisted as a string array. Please note that the blacklist in SelfControl might get overridden and should be __backed up__ before using Auto-SelfControl.
 - _block-schedules_ contains a list of schedules when SelfControl should be started.
@@ -100,8 +134,8 @@ The following listing shows another example that blocks twitter and reddit every
 
 ### ImportError: No module named Foundation
 
-If you've installed Python using HomeBrew, you'll need to run Auto-SelfControl with the original Python installation from OS X:
+If you've installed another version of Python (e.g., using Homebrew), you'll need to run Auto-SelfControl with the original Python installation from macOS:
 
     sudo /usr/bin/python auto-selfcontrol.py
-    
-There are also other options, including installing `pyobjc` on your brewed Python (`pip install pyobjc`). [See this thread for alternative solutions](https://stackoverflow.com/questions/1614648/importerror-no-module-named-foundation#1616361).
+
+There are also other options, including installing `pyobjc` on your own Python version (`pip install pyobjc`). [See this thread for alternative solutions](https://stackoverflow.com/questions/1614648/importerror-no-module-named-foundation#1616361).
