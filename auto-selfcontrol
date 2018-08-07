@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Auto-SelfControl basic command-line interface
 
-CONFIG_FILE="/usr/local/etc/auto-selfcontrol/config.json"
+CONFIG_FILE="~/.config/auto-selfcontrol/config.json"
 b=$(tput bold)
 n=$(tput sgr0)
 HELP_TEXT="Auto-SelfControl (c) Andreas Grill
@@ -22,7 +22,7 @@ if [[ $1 ]]; then
     case "$1" in
         # Edit configuration file
         config|edit|set|conf*)
-            # If no "config.json" in /usr/local/etc/auto-selfcontrol/
+            # If no "config.json" in ~/.config/auto-selfcontrol/
             if [[ ! -f $CONFIG_FILE ]]; then
                 # If existing "config.json" in the cwd, copy it
                 if [[ -f config.json ]]; then
