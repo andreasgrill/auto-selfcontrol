@@ -13,26 +13,27 @@ from optparse import OptionParser
 
 
 def load_config(config_files):
-    """ loads json configuration files
-    the latter configs overwrite the previous configs
     """
+    Load JSON configuration files.
 
+    The latter configs overwrite the previous configs.
+    """
     config = dict()
 
-    for f in config_files:
+    for file in config_files:
         try:
-            with open(f, 'rt') as cfg:
+            with open(file, 'rt') as cfg:
                 config.update(json.load(cfg))
-        except ValueError as e:
-            exit_with_error("The json config file {configfile} is not correctly formatted." \
-                            "The following exception was raised:\n{exc}".format(configfile=f, exc=e))
+        except ValueError as exception:
+            exit_with_error("The JSON config file {configfile} is not correctly formatted."
+                            "The following exception was raised:\
+                            \n{exc}".format(configfile=file, exc=exception))
 
     return config
 
 
 def run(config):
-    """ starts self-control with custom parameters, depending on the weekday and the config """
-
+    """Start self-control with custom parameters, depending on the weekday and the config."""
     if check_if_running(config["username"]):
         syslog.syslog(syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
         exit(2)
@@ -66,13 +67,13 @@ def run(config):
 
 
 def check_if_running(username):
-    """ checks if self-control is already running. """
+    """Check if self-control is already running."""
     defaults = get_selfcontrol_settings(username)
     return defaults.has_key("BlockStartedDate") and not NSDate.distantFuture().isEqualToDate_(defaults["BlockStartedDate"])
 
 
 def is_schedule_active(schedule):
-    """ checks if we are right now in the provided schedule or not """
+    """Check if we are right now in the provided schedule or not."""
     currenttime = datetime.datetime.today()
     starttime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, schedule["start-hour"],
                                   schedule["start-minute"])
@@ -100,7 +101,7 @@ def is_schedule_active(schedule):
 
 
 def get_duration_minutes(endhour, endminute):
-    """ returns the minutes left until the schedule's end-hour and end-minute are reached """
+    """Return the minutes left until the schedule's end-hour and end-minute are reached."""
     currenttime = datetime.datetime.today()
     endtime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, endhour, endminute)
     d = endtime - currenttime
@@ -108,12 +109,12 @@ def get_duration_minutes(endhour, endminute):
 
 
 def get_schedule_weekdays(schedule):
-    """ returns a list of weekdays the specified schedule is active """
+    """Return a list of weekdays the specified schedule is active."""
     return [schedule["weekday"]] if schedule.get("weekday", None) is not None else range(1, 8)
 
 
 def set_selfcontrol_setting(key, value, username):
-    """ sets a single default setting of SelfControl for the provied username """
+    """Set a single default setting of SelfControl for the provided username."""
     NSUserDefaults.resetStandardUserDefaults()
     originalUID = os.geteuid()
     os.seteuid(getpwnam(username).pw_uid)
@@ -124,7 +125,7 @@ def set_selfcontrol_setting(key, value, username):
 
 
 def get_selfcontrol_settings(username):
-    """ returns all default settings of SelfControl for the provided username """
+    """Return all default settings of SelfControl for the provided username."""
     NSUserDefaults.resetStandardUserDefaults()
     originalUID = os.geteuid()
     os.seteuid(getpwnam(username).pw_uid)
@@ -138,7 +139,7 @@ def get_selfcontrol_settings(username):
 
 
 def get_launchscript(config):
-    """ returns the string of the launchscript """
+    """Return the string of the launchscript."""
     return '''<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
     <plist version="1.0">
@@ -161,11 +162,11 @@ def get_launchscript(config):
 
 
 def get_launchscript_startintervals(config):
-    """ returns the string of the launchscript start intervals """
-    entries = list()
+    """Return the string of the launchscript start intervals."""
+    # entries = list()
     for schedule in config["block-schedules"]:
         for weekday in get_schedule_weekdays(schedule):
-            yield ('''<dict>
+            yield '''<dict>
                     <key>Weekday</key>
                     <integer>{weekday}</integer>
                     <key>Minute</key>
@@ -173,7 +174,7 @@ def get_launchscript_startintervals(config):
                     <key>Hour</key>
                     <integer>{starthour}</integer>
                 </dict>
-                '''.format(weekday=weekday, startminute=schedule['start-minute'], starthour=schedule['start-hour']))
+                '''.format(weekday=weekday, startminute=schedule['start-minute'], starthour=schedule['start-hour'])
 
 
 def install(config):
@@ -233,7 +234,7 @@ def get_osx_usernames():
 
 
 def excepthook(excType, excValue, tb):
-    """ this function is called whenever an exception is not caught """
+    """ This function is called whenever an exception is not caught. """
     err = "Uncaught exception:\n{}\n{}\n{}".format(str(excType), excValue,
                                                    "".join(traceback.format_exception(excType, excValue, tb)))
     syslog.syslog(syslog.LOG_CRIT, err)
@@ -248,31 +249,32 @@ def exit_with_error(message):
 
 
 if __name__ == "__main__":
-    home_dir = os.path.expanduser('~')
-    config_dir = os.path.realpath('.config/auto-selfcontrol')
-    config_file = os.path.join(home_dir, config_dir, 'config.json')
+    CONFIG_DIR = os.path.join(os.path.expanduser('~'),
+                              '.config/auto-selfcontrol')
+    CONFIG_FILE = os.path.join(CONFIG_DIR, 'config.json')
 
     sys.excepthook = excepthook
 
     syslog.openlog("Auto-SelfControl")
 
     if os.geteuid() != 0:
-        exit_with_error("Please make sure to run the script with elevated rights, such as:\nsudo python {file}".format(
-                file=os.path.realpath(__file__)))
+        exit_with_error("Please make sure to run the script with elevated \
+                         rights, such as:\nsudo python {file} \
+                         ".format(file=os.path.realpath(__file__)))
 
     parser = OptionParser()
     parser.add_option("-r", "--run", action="store_true",
                       dest="run", default=False)
     (opts, args) = parser.parse_args()
-    config = load_config([config_file])
+    CONFIG = load_config([CONFIG_FILE])
 
     if opts.run:
-        run(config)
+        run(CONFIG)
     else:
-        check_config(config)
-        install(config)
-        if not check_if_running(config["username"]) and any(s for s in config["block-schedules"] if is_schedule_active(s)):
+        check_config(CONFIG)
+        install(CONFIG)
+        if not check_if_running(CONFIG["username"]) and any(s for s in CONFIG["block-schedules"] if is_schedule_active(s)):
             print("> Active schedule found for SelfControl!")
             print("> Start SelfControl (this could take a few minutes)\n")
-            run(config)
+            run(CONFIG)
             print("\n> SelfControl was started.\n")
