@@ -262,18 +262,19 @@ if __name__ == "__main__":
                          rights, such as:\nsudo python {file} \
                          ".format(file=os.path.realpath(__file__)))
 
-    parser = OptionParser()
-    parser.add_option("-r", "--run", action="store_true",
+    PARSER = OptionParser()
+    PARSER.add_option("-r", "--run", action="store_true",
                       dest="run", default=False)
-    (opts, args) = parser.parse_args()
+    (OPTS, ARGS) = PARSER.parse_args()
     CONFIG = load_config([CONFIG_FILE])
 
-    if opts.run:
+    if OPTS.run:
         run(CONFIG)
     else:
         check_config(CONFIG)
         install(CONFIG)
-        if not check_if_running(CONFIG["username"]) and any(s for s in CONFIG["block-schedules"] if is_schedule_active(s)):
+        if not check_if_running(CONFIG["username"]) and \
+           any(s for s in CONFIG["block-schedules"] if is_schedule_active(s)):
             print("> Active schedule found for SelfControl!")
             print("> Start SelfControl (this could take a few minutes)\n")
             run(CONFIG)
