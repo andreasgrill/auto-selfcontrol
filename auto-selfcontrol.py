@@ -249,8 +249,7 @@ def exit_with_error(message):
 
 
 if __name__ == "__main__":
-    CONFIG_DIR = os.path.join(os.path.expanduser('~'),
-                              '.config/auto-selfcontrol')
+    CONFIG_DIR = os.path.join('/usr/local/etc/auto-selfcontrol')
     CONFIG_FILE = os.path.join(CONFIG_DIR, 'config.json')
 
     sys.excepthook = excepthook
