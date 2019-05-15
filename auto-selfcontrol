@@ -45,7 +45,7 @@ if [[ $1 ]]; then
             ;;
         # Install plist config
         activate|install)
-            sudo /usr/bin/python auto-selfcontrol.py
+            sudo /usr/bin/python /usr/local/bin/auto-selfcontrol.py
             exit 0
             ;;
         -h|--help|help|*)
