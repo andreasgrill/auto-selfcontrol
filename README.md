@@ -14,7 +14,7 @@ You can plan for every weekday if and when SelfControl should start and stop.
 The easiest way to install Auto-SelfControl is with [Homebrew](https://brew.sh/). Install Auto-SelfControl by running the following command in the Terminal:
 
     brew tap sbibauw/utils
-    brew install --HEAD auto-selfcontrol
+    brew install auto-selfcontrol
 
 If you already have [SelfControl](http://selfcontrolapp.com), start it and **backup your blacklist** as it might get overridden by Auto-SelfControl. 
 
