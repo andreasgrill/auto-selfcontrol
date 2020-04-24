@@ -1,10 +1,10 @@
 {
   "username": "shiv",
   "selfcontrol-path": "/Applications/SelfControl.app",
-  "host-blacklist": [
-    "placeholder"
+  "host-blacklist": [],
+  "host-blacklist-paths": [
+    "blacklist.txt"
   ],
-  "host-blacklist-path": "blacklist.txt",
   "block-schedules": [
     {
       "weekday": "weekdays",
