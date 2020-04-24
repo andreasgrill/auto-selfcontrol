@@ -1,59 +1,38 @@
 {
-    "username": "MY_USERNAME",
-    "selfcontrol-path": "/Applications/SelfControl.app",
-    "host-blacklist": [
-        "twitter.com",
-        "reddit.com"
-    ],
-    "block-schedules":[
-        {
-            "weekday": 1,
-            "start-hour": 8,
-            "start-minute": 0,
-            "end-hour": 17,
-            "end-minute": 0
-        },
-        {
-            "weekday": 2,
-            "start-hour": 8,
-            "start-minute": 0,
-            "end-hour": 17,
-            "end-minute": 0
-        },
-        {
-            "weekday": 3,
-            "start-hour": 8,
-            "start-minute": 0,
-            "end-hour": 17,
-            "end-minute": 0
-        },
-        {
-            "weekday": 4,
-            "start-hour": 8,
-            "start-minute": 0,
-            "end-hour": 17,
-            "end-minute": 0
-        },
-        {
-            "weekday": 5,
-            "start-hour": 8,
-            "start-minute": 0,
-            "end-hour": 17,
-            "end-minute": 0
-        },
-        {
-            "weekday": 6,
-            "start-hour": 8,
-            "start-minute": 0,
-            "end-hour": 17,
-            "end-minute": 0
-        },
-        {
-            "weekday": 7,
-            "start-hour": 8,
-            "start-minute": 0,
-            "end-hour": 17,
-            "end-minute": 0
-        }
-    ]
+  "username": "shiv",
+  "selfcontrol-path": "/Applications/SelfControl.app",
+  "host-blacklist": [
+    "placeholder"
+  ],
+  "host-blacklist-path": "blacklist.txt",
+  "block-schedules": [
+    {
+      "weekday": "weekdays",
+      "start-hour": 10,
+      "start-minute": 0,
+      "end-hour": 13,
+      "end-minute": 0
+    },
+    {
+      "weekday": "weekdays",
+      "start-hour": 14,
+      "start-minute": 30,
+      "end-hour": 18,
+      "end-minute": 0
+    },
+    {
+      "weekday": "weekdays",
+      "start-hour": 20,
+      "start-minute": 0,
+      "end-hour": 22,
+      "end-minute": 0
+    },
+    {
+      "weekday": "weekends",
+      "start-hour": 10,
+      "start-minute": 0,
+      "end-hour": 13,
+      "end-minute": 0
+    }
+  ]
 }

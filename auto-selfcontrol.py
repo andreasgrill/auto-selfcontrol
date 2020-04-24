@@ -26,7 +26,11 @@ def load_config(config_files):
         except ValueError as e:
             exit_with_error("The json config file {configfile} is not correctly formatted." \
                             "The following exception was raised:\n{exc}".format(configfile=f, exc=e))
-
+    if config.get("host-blacklist-path",None) is not None:
+        # overwrite config["host-blacklist"]
+        blacklist_location = os.path.realpath(os.path.join(os.getcwd(),config["host-blacklist-path"]))
+        with open(blacklist_location,"rt") as bl:
+            config["host-blacklist"] = [x.strip() for x in bl]
     return config
 
 
