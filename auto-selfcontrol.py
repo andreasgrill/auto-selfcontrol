@@ -109,7 +109,17 @@ def get_duration_minutes(endhour, endminute):
 
 def get_schedule_weekdays(schedule):
     """ returns a list of weekdays the specified schedule is active """
-    return [schedule["weekday"]] if schedule.get("weekday", None) is not None else range(1, 8)
+    if schedule.get("weekday", None) is not None:
+        if schedule["weekday"] == "weekdays":
+            return range(1,6)
+        elif schedule["weekday"] == "weekends":
+            return range(6,8)
+        elif type(schedule["weekday"]) == list:
+            return schedule["weekday"]
+        elif type(schedule["weekday"]) == int:
+            return [schedule["weekday"]]
+    else:
+        return range(1,8)
 
 
 def set_selfcontrol_setting(key, value, username):
