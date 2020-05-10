@@ -7,9 +7,15 @@ import datetime
 import syslog
 import traceback
 import sys
+import re
 from Foundation import NSUserDefaults, CFPreferencesSetAppValue, CFPreferencesAppSynchronize, NSDate
 from pwd import getpwnam
 from optparse import OptionParser
+
+
+class Api:
+    V2 = 2
+    V3 = 3
 
 
 def load_config(path):
@@ -27,10 +33,28 @@ def load_config(path):
     return config
 
 
-def runApiV2(config):
-    """Start SelfControl (< 3.0) with custom parameters, depending on the weekday and the config."""
+def detect_api(config):
+    """Return the supported API version of the SelfControl"""
+    try:
+        output = execSelfControl(config, ["--version"])
+        m = re.search(
+            get_selfcontrol_out_pattern(r'(\d+)\.\d+\.\d+'), output, re.MULTILINE)
+        if m is None:
+            exit_with_error("Could not parse SelfControl version response!")
+        if m and int(m.groups()[0]) >= Api.V3:
+            return Api.V3
 
-    if check_if_running(config["username"]):
+        exit_with_error("Unexpected version returned from SelfControl '{version}'".format(
+            version=m.groups()[0]))
+    except:
+        # SelfControl < 3.0.0 does not support the --version argument
+        return Api.V2
+
+
+def runApiV2(config):
+    """Start SelfControl (< 3.0) with custom parameters, depending on the weekday and the config"""
+
+    if check_if_running(Api.V2, config):
         syslog.syslog(
             syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
         exit(2)
@@ -70,10 +94,36 @@ def runApiV2(config):
                   "SelfControl started for {min} minute(s).".format(min=duration))
 
 
-def check_if_running(username):
-    """Check if self-control is already running."""
-    defaults = get_selfcontrol_settings(username)
-    return defaults.has_key("BlockStartedDate") and not NSDate.distantFuture().isEqualToDate_(defaults["BlockStartedDate"])
+def runApiV3(config):
+    """Start SelfControl with custom parameters, depending on the weekday and the config"""
+
+    if check_if_running(Api.V3, config):
+        syslog.syslog(
+            syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
+        exit(2)
+
+
+def get_selfcontrol_out_pattern(content_pattern):
+    """Returns a RegEx pattern that matches SelfControl's output with the provided content_pattern"""
+    return r'^.*org\.eyebeam\.SelfControl[^ ]+\s*' + content_pattern + r'\s*$'
+
+
+def check_if_running(api, config):
+    """Check if SelfControl is already running."""
+    if api is Api.V2:
+        username = config["username"]
+        defaults = get_selfcontrol_settings(username)
+        return defaults.has_key("BlockStartedDate") and not NSDate.distantFuture().isEqualToDate_(defaults["BlockStartedDate"])
+    elif api is Api.V3:
+        output = execSelfControl(config, ["--is-running"])
+        m = re.search(
+            get_selfcontrol_out_pattern(r'(NO|YES)'), output, re.MULTILINE)
+        if m is None:
+            exit_with_error("Could not detect if SelfControl is running.")
+        return m.groups()[0] != 'NO'
+    else:
+        raise Exception(
+            "Unknown API version {version} passed.".format(version=api))
 
 
 def is_schedule_active(schedule):
@@ -184,7 +234,10 @@ def get_launchscript_startintervals(config):
 def execSelfControl(config, arguments):
     user_id = str(getpwnam(config["username"]).pw_uid)
     output = subprocess.check_output(
-        ["{path}/Contents/MacOS/org.eyebeam.SelfControl".format(path=config["selfcontrol-path"]), user_id] + arguments)
+        ["{path}/Contents/MacOS/org.eyebeam.SelfControl".format(
+            path=config["selfcontrol-path"]), user_id] + arguments,
+        stderr=subprocess.STDOUT
+    )
     return output
 
 
@@ -292,12 +345,19 @@ if __name__ == "__main__":
 
     CONFIG = load_config(CONFIG_FILES[0])
 
+    api = detect_api(CONFIG)
+    print("Detected API v{version}".format(version=api))
+
     if OPTS.run:
-        runApiV2(CONFIG)
+        if api is Api.V2:
+            runApiV2(CONFIG)
+        elif api is Api.V3:
+            runApiV3(CONFIG)
     else:
         check_config(CONFIG)
         install(CONFIG)
-        if not check_if_running(CONFIG["username"]) and \
+        if api is Api.V3 and \
+            not check_if_running(api, CONFIG) and \
                 any(s for s in CONFIG["block-schedules"] if is_schedule_active(s)):
             print("> Active schedule found for SelfControl!")
             print("> Start SelfControl (this could take a few minutes)\n")
