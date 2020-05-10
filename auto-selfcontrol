@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Auto-SelfControl basic command-line interface
 
-CONFIG_FILE="/usr/local/etc/auto-selfcontrol/config.json"
+CONFIG_DIR="/usr/local/etc/auto-selfcontrol"
+CONFIG_FILE="$CONFIG_DIR/config.json"
 b=$(tput bold)
 n=$(tput sgr0)
 HELP_TEXT="Auto-SelfControl
@@ -22,12 +23,13 @@ if [[ $1 ]]; then
     case "$1" in
         # Edit configuration file
         config|edit|set|conf*)
-            # If no "config.json" in ~/.config/auto-selfcontrol/
+            # If no "config.json" found
             if [[ ! -f $CONFIG_FILE ]]; then
+                mkdir -p $CONFIG_DIR
                 # If existing "config.json" in the cwd, copy it
                 if [[ -f config.json ]]; then
                     cp "config.json" $CONFIG_FILE
-                    echo "Copied config.json from the current directory to $CONFIG_FILE"
+                    echo "Copied config.json from the current directory to $CONFIG_DIR"
                 # else download sample config from github repository
                 else
                     curl -L -s "https://raw.githubusercontent.com/andreasgrill/auto-selfcontrol/master/config.json" -o $CONFIG_FILE

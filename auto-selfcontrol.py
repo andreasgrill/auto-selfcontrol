@@ -12,28 +12,24 @@ from pwd import getpwnam
 from optparse import OptionParser
 
 
-def load_config(config_files):
-    """
-    Load JSON configuration files.
-
-    The latter configs overwrite the previous configs.
-    """
+def load_config(path):
+    """Load a JSON configuration file"""
     config = dict()
 
-    for file in config_files:
-        try:
-            with open(file, 'rt') as cfg:
-                config.update(json.load(cfg))
-        except ValueError as exception:
-            exit_with_error("The JSON config file {configfile} is not correctly formatted."
-                            "The following exception was raised:\
-                            \n{exc}".format(configfile=file, exc=exception))
+    try:
+        with open(path, 'rt') as cfg:
+            config.update(json.load(cfg))
+    except ValueError as exception:
+        exit_with_error("The JSON config file {configfile} is not correctly formatted."
+                        "The following exception was raised:\
+                        \n{exc}".format(configfile=path, exc=exception))
 
     return config
 
 
-def run(config):
-    """Start self-control with custom parameters, depending on the weekday and the config."""
+def runApiV2(config):
+    """Start SelfControl (< 3.0) with custom parameters, depending on the weekday and the config."""
+
     if check_if_running(config["username"]):
         syslog.syslog(
             syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
@@ -68,8 +64,7 @@ def run(config):
             "BlockStartedDate", NSDate.date(), config["username"])
 
     # Start SelfControl
-    os.system("{path}/Contents/MacOS/org.eyebeam.SelfControl {userId} --install".format(
-        path=config["selfcontrol-path"], userId=str(getpwnam(config["username"]).pw_uid)))
+    execSelfControl(config, ["--install"])
 
     syslog.syslog(syslog.LOG_ALERT,
                   "SelfControl started for {min} minute(s).".format(min=duration))
@@ -186,6 +181,13 @@ def get_launchscript_startintervals(config):
                 '''.format(weekday=weekday, startminute=schedule['start-minute'], starthour=schedule['start-hour'])
 
 
+def execSelfControl(config, arguments):
+    user_id = str(getpwnam(config["username"]).pw_uid)
+    output = subprocess.check_output(
+        ["{path}/Contents/MacOS/org.eyebeam.SelfControl".format(path=config["selfcontrol-path"]), user_id] + arguments)
+    return output
+
+
 def install(config):
     """ installs auto-selfcontrol """
     print("> Start installation of Auto-SelfControl")
@@ -259,9 +261,10 @@ def exit_with_error(message):
 
 
 if __name__ == "__main__":
-    CONFIG_DIR = os.path.join('/usr/local/etc/auto-selfcontrol')
-    CONFIG_FILE = os.path.join(CONFIG_DIR, 'config.json')
-
+    CONFIG_DIRS = [
+        os.path.join('/usr/local/etc/auto-selfcontrol'),
+        os.path.dirname(os.path.realpath(__file__))
+    ]
     sys.excepthook = excepthook
 
     syslog.openlog("Auto-SelfControl")
@@ -275,16 +278,28 @@ if __name__ == "__main__":
     PARSER.add_option("-r", "--run", action="store_true",
                       dest="run", default=False)
     (OPTS, ARGS) = PARSER.parse_args()
-    CONFIG = load_config([CONFIG_FILE])
+
+    CONFIG_FILES = filter(lambda p: os.path.exists(p), map(
+        lambda d: os.path.join(d, 'config.json'), CONFIG_DIRS))
+
+    if len(CONFIG_FILES) is 0:
+        exit_with_error(
+            "There was no config file found, please create a config file.")
+
+    if len(CONFIG_FILES) > 1:
+        print("> Multiple config files were found, use config file with path: {path}".format(
+            path=CONFIG_FILES[0]))
+
+    CONFIG = load_config(CONFIG_FILES[0])
 
     if OPTS.run:
-        run(CONFIG)
+        runApiV2(CONFIG)
     else:
         check_config(CONFIG)
         install(CONFIG)
         if not check_if_running(CONFIG["username"]) and \
-           any(s for s in CONFIG["block-schedules"] if is_schedule_active(s)):
+                any(s for s in CONFIG["block-schedules"] if is_schedule_active(s)):
             print("> Active schedule found for SelfControl!")
             print("> Start SelfControl (this could take a few minutes)\n")
-            run(CONFIG)
+            runApiV2(CONFIG)
             print("\n> SelfControl was started.\n")
