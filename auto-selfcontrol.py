@@ -35,35 +35,44 @@ def load_config(config_files):
 def run(config):
     """Start self-control with custom parameters, depending on the weekday and the config."""
     if check_if_running(config["username"]):
-        syslog.syslog(syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
+        syslog.syslog(
+            syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
         exit(2)
 
     try:
-        schedule = next(s for s in config["block-schedules"] if is_schedule_active(s))
+        schedule = next(
+            s for s in config["block-schedules"] if is_schedule_active(s))
     except StopIteration:
-        syslog.syslog(syslog.LOG_ALERT, "No schedule is active at the moment. Shutting down.")
+        syslog.syslog(syslog.LOG_ALERT,
+                      "No schedule is active at the moment. Shutting down.")
         exit(0)
 
-    duration = get_duration_minutes(schedule["end-hour"], schedule["end-minute"])
+    duration = get_duration_minutes(
+        schedule["end-hour"], schedule["end-minute"])
 
     set_selfcontrol_setting("BlockDuration", duration, config["username"])
     set_selfcontrol_setting("BlockAsWhitelist", 1 if schedule.get("block-as-whitelist", False) else 0,
                             config["username"])
 
     if schedule.get("host-blacklist", None) is not None:
-        set_selfcontrol_setting("HostBlacklist", schedule["host-blacklist"], config["username"])
+        set_selfcontrol_setting(
+            "HostBlacklist", schedule["host-blacklist"], config["username"])
     elif config.get("host-blacklist", None) is not None:
-        set_selfcontrol_setting("HostBlacklist", config["host-blacklist"], config["username"])
+        set_selfcontrol_setting(
+            "HostBlacklist", config["host-blacklist"], config["username"])
 
     # In legacy mode manually set the BlockStartedDate, this should not be required anymore in future versions
     # of SelfControl.
     if config.get("legacy-mode", True):
-        set_selfcontrol_setting("BlockStartedDate", NSDate.date(), config["username"])
+        set_selfcontrol_setting(
+            "BlockStartedDate", NSDate.date(), config["username"])
 
     # Start SelfControl
-    os.system("{path}/Contents/MacOS/org.eyebeam.SelfControl {userId} --install".format(path=config["selfcontrol-path"], userId=str(getpwnam(config["username"]).pw_uid)))
+    os.system("{path}/Contents/MacOS/org.eyebeam.SelfControl {userId} --install".format(
+        path=config["selfcontrol-path"], userId=str(getpwnam(config["username"]).pw_uid)))
 
-    syslog.syslog(syslog.LOG_ALERT, "SelfControl started for {min} minute(s).".format(min=duration))
+    syslog.syslog(syslog.LOG_ALERT,
+                  "SelfControl started for {min} minute(s).".format(min=duration))
 
 
 def check_if_running(username):
@@ -103,7 +112,8 @@ def is_schedule_active(schedule):
 def get_duration_minutes(endhour, endminute):
     """Return the minutes left until the schedule's end-hour and end-minute are reached."""
     currenttime = datetime.datetime.today()
-    endtime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, endhour, endminute)
+    endtime = datetime.datetime(
+        currenttime.year, currenttime.month, currenttime.day, endhour, endminute)
     d = endtime - currenttime
     return int(round(d.seconds / 60.0))
 
@@ -163,7 +173,6 @@ def get_launchscript(config):
 
 def get_launchscript_startintervals(config):
     """Return the string of the launchscript start intervals."""
-    # entries = list()
     for schedule in config["block-schedules"]:
         for weekday in get_schedule_weekdays(schedule):
             yield '''<dict>
@@ -205,17 +214,18 @@ def check_config(config):
         exit_with_error("No username specified in config.")
     if config["username"] not in get_osx_usernames():
         exit_with_error(
-                "Username '{username}' unknown.\nPlease use your OSX username instead.\n" \
-                "If you have trouble finding it, just enter the command 'whoami'\n" \
-                "in your terminal.".format(
-                        username=config["username"]))
+            "Username '{username}' unknown.\nPlease use your OSX username instead.\n"
+            "If you have trouble finding it, just enter the command 'whoami'\n"
+            "in your terminal.".format(
+                username=config["username"]))
     if not config.has_key("selfcontrol-path"):
-        exit_with_error("The setting 'selfcontrol-path' is required and must point to the location of SelfControl.")
+        exit_with_error(
+            "The setting 'selfcontrol-path' is required and must point to the location of SelfControl.")
     if not os.path.exists(config["selfcontrol-path"]):
         exit_with_error(
-                "The setting 'selfcontrol-path' does not point to the correct location of SelfControl. " \
-                "Please make sure to use an absolute path and include the '.app' extension, " \
-                "e.g. /Applications/SelfControl.app")
+            "The setting 'selfcontrol-path' does not point to the correct location of SelfControl. "
+            "Please make sure to use an absolute path and include the '.app' extension, "
+            "e.g. /Applications/SelfControl.app")
     if not config.has_key("block-schedules"):
         exit_with_error("The setting 'block-schedules' is required.")
     if len(config["block-schedules"]) == 0:

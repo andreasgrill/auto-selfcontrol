@@ -4,7 +4,7 @@
 CONFIG_FILE="/usr/local/etc/auto-selfcontrol/config.json"
 b=$(tput bold)
 n=$(tput sgr0)
-HELP_TEXT="Auto-SelfControl (c) Andreas Grill
+HELP_TEXT="Auto-SelfControl
 Small utility to schedule start and stop times of SelfControl.
 
 Usage: ${b}$(basename "$0") <config|activate|help>${n}
