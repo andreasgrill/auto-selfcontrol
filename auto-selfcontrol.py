@@ -3,7 +3,9 @@
 import subprocess
 import os
 import json
-import datetime
+import time
+from datetime import datetime
+import plistlib
 import syslog
 import traceback
 import sys
@@ -11,6 +13,8 @@ import re
 from Foundation import NSUserDefaults, CFPreferencesSetAppValue, CFPreferencesAppSynchronize, NSDate
 from pwd import getpwnam
 from optparse import OptionParser
+
+SETTINGS_DIR = '/usr/local/etc/auto-selfcontrol'
 
 
 class Api:
@@ -51,10 +55,11 @@ def detect_api(config):
         return Api.V2
 
 
-def runApiV2(config):
+def run_api_v2(config):
     """Start SelfControl (< 3.0) with custom parameters, depending on the weekday and the config"""
 
     if check_if_running(Api.V2, config):
+        print "SelfControl is already running, exit"
         syslog.syslog(
             syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
         exit(2)
@@ -63,6 +68,7 @@ def runApiV2(config):
         schedule = next(
             s for s in config["block-schedules"] if is_schedule_active(s))
     except StopIteration:
+        print("No Schedule is active at the moment.")
         syslog.syslog(syslog.LOG_ALERT,
                       "No schedule is active at the moment. Shutting down.")
         exit(0)
@@ -94,13 +100,34 @@ def runApiV2(config):
                   "SelfControl started for {min} minute(s).".format(min=duration))
 
 
-def runApiV3(config):
+def run_api_v3(config, settings_dir):
     """Start SelfControl with custom parameters, depending on the weekday and the config"""
 
     if check_if_running(Api.V3, config):
+        print "SelfControl is already running, exit"
         syslog.syslog(
             syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
         exit(2)
+
+    try:
+        schedule = next(
+            s for s in config["block-schedules"] if is_schedule_active(s))
+    except StopIteration:
+        print("No Schedule is active at the moment.")
+        syslog.syslog(syslog.LOG_ALERT,
+                      "No schedule is active at the moment. Shutting down.")
+        exit(0)
+
+    block_end_date = get_end_date_of_schedule(schedule)
+    blocklist_path = "{settings}/blocklist".format(settings=settings_dir)
+
+    update_blocklist(blocklist_path, config, schedule)
+
+    # Start SelfControl
+    execSelfControl(config, ["--install", blocklist_path, block_end_date])
+
+    syslog.syslog(syslog.LOG_ALERT,
+                  "SelfControl started until {end} minute(s).".format(end=block_end_date))
 
 
 def get_selfcontrol_out_pattern(content_pattern):
@@ -128,11 +155,11 @@ def check_if_running(api, config):
 
 def is_schedule_active(schedule):
     """Check if we are right now in the provided schedule or not."""
-    currenttime = datetime.datetime.today()
-    starttime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, schedule["start-hour"],
-                                  schedule["start-minute"])
-    endtime = datetime.datetime(currenttime.year, currenttime.month, currenttime.day, schedule["end-hour"],
-                                schedule["end-minute"])
+    currenttime = datetime.today()
+    starttime = datetime(currenttime.year, currenttime.month, currenttime.day, schedule["start-hour"],
+                         schedule["start-minute"])
+    endtime = datetime(currenttime.year, currenttime.month, currenttime.day, schedule["end-hour"],
+                       schedule["end-minute"])
     d = endtime - starttime
 
     for weekday in get_schedule_weekdays(schedule):
@@ -156,11 +183,26 @@ def is_schedule_active(schedule):
 
 def get_duration_minutes(endhour, endminute):
     """Return the minutes left until the schedule's end-hour and end-minute are reached."""
-    currenttime = datetime.datetime.today()
-    endtime = datetime.datetime(
+    currenttime = datetime.today()
+    endtime = datetime(
         currenttime.year, currenttime.month, currenttime.day, endhour, endminute)
     d = endtime - currenttime
     return int(round(d.seconds / 60.0))
+
+
+def get_end_date_of_schedule(schedule):
+    """Return the end date of the provided schedule in ISO 8601 format"""
+    currenttime = datetime.today()
+    endtime = datetime(
+        currenttime.year, currenttime.month, currenttime.day, schedule['end-hour'], schedule['end-minute'])
+    # manually create ISO8601 string because of tz issues with Python2
+    ts = time.time()
+    utc_offset = ((datetime.fromtimestamp(
+        ts) - datetime.utcfromtimestamp(ts)).total_seconds()) / 3600
+    offset = str(int(utc_offset * 100)).zfill(4)
+    sign = "+" if utc_offset >= 0 else "-"
+
+    return endtime.strftime("%Y.%m.%dT%H:%M:%S{sign}{offset}".format(sign=sign, offset=offset))
 
 
 def get_schedule_weekdays(schedule):
@@ -293,6 +335,16 @@ def check_config(config):
         syslog.syslog(syslog.LOG_WARNING, msg)
 
 
+def update_blocklist(blocklist_path, config, schedule):
+    """Save the blocklist with the current configuration"""
+    plist = {
+        "HostBlacklist": config["host-blacklist"],
+        "BlockAsWhitelist": schedule.get("block-as-whitelist", False)
+    }
+    with open(blocklist_path, 'wb') as fp:
+        plistlib.writePlist(plist, fp)
+
+
 def get_osx_usernames():
     output = subprocess.check_output(["dscl", ".", "list", "/users"])
     return [s.strip() for s in output.splitlines()]
@@ -315,7 +367,7 @@ def exit_with_error(message):
 
 if __name__ == "__main__":
     CONFIG_DIRS = [
-        os.path.join('/usr/local/etc/auto-selfcontrol'),
+        os.path.join(SETTINGS_DIR),
         os.path.dirname(os.path.realpath(__file__))
     ]
     sys.excepthook = excepthook
@@ -348,11 +400,14 @@ if __name__ == "__main__":
     api = detect_api(CONFIG)
     print("Detected API v{version}".format(version=api))
 
+    if not os.path.exists(SETTINGS_DIR):
+        os.makedirs(SETTINGS_DIR)
+
     if OPTS.run:
         if api is Api.V2:
-            runApiV2(CONFIG)
+            run_api_v2(CONFIG)
         elif api is Api.V3:
-            runApiV3(CONFIG)
+            run_api_v3(CONFIG, SETTINGS_DIR)
     else:
         check_config(CONFIG)
         install(CONFIG)
@@ -361,5 +416,5 @@ if __name__ == "__main__":
                 any(s for s in CONFIG["block-schedules"] if is_schedule_active(s)):
             print("> Active schedule found for SelfControl!")
             print("> Start SelfControl (this could take a few minutes)\n")
-            runApiV2(CONFIG)
+            run_api_v2(CONFIG)
             print("\n> SelfControl was started.\n")
