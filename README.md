@@ -1,6 +1,3 @@
-# Important: SelfControl 3.0 Update
-Auto-SelfControl will support SelfControl 3.0 in the coming release, which will be hopefully out in the next few days.
-
 # Auto-SelfControl
 
 Small utility to schedule start and stop times of [SelfControl](http://selfcontrolapp.com).
