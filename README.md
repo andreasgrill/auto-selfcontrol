@@ -32,7 +32,9 @@ Run from this specific repository
 
     ./auto-selfcontrol <config|activate|help>
 
-Or create a symlink in your `/usr/local/bin` folder to access it from anywhere.
+Optionally create a symlink in your `/usr/local/bin` folder to access it from anywhere:
+
+    sudo ln -s ./auto-selfcontrol /usr/local/bin/auto-selfcontrol 
 
 ## Usage
 
@@ -54,6 +56,9 @@ To remove the application (if installed with Homebrew):
     brew uninstall auto-selfcontrol
 
 Or, manually, by removing the directory where you installed the files.
+
+    sudo unlink /usr/local/bin/auto-selfcontrol
+    rm -rf ~/auto-selfcontrol
 
 You also need to remove the automatic schedule by executing the following command in the Terminal:
 
@@ -140,3 +145,4 @@ If you've installed another version of Python (e.g., using Homebrew), you'll nee
     sudo /usr/bin/python auto-selfcontrol.py
 
 There are also other options, including installing `pyobjc` on your own Python version (`pip install pyobjc`). [See this thread for alternative solutions](https://stackoverflow.com/questions/1614648/importerror-no-module-named-foundation#1616361).
+

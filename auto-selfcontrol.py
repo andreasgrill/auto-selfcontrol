@@ -37,6 +37,23 @@ def load_config(path):
     return config
 
 
+def find_config():
+    """Looks for the config.json and returns its path"""
+    local_config_file = "{path}/config.json".format(
+        path=os.path.dirname(os.path.realpath(__file__)))
+    global_config_file = "{path}/config.json".format(
+        path=SETTINGS_DIR)
+
+    if os.path.exists(local_config_file):
+        return local_config_file
+
+    if os.path.exists(global_config_file):
+        return global_config_file
+
+    exit_with_error(
+        "There was no config file found, please create a config file.")
+
+
 def detect_api(config):
     """Return the supported API version of the SelfControl"""
     try:
@@ -53,6 +70,23 @@ def detect_api(config):
     except:
         # SelfControl < 3.0.0 does not support the --version argument
         return Api.V2
+
+
+def run(settings_dir):
+    """Load config and start SelfControl"""
+    run_config = "{path}/run_config.json".format(path=settings_dir)
+    if not os.path.exists(run_config):
+        exit_with_error(
+            "Run config file could not be found in installation location, please make sure that you have Auto-SelfControl installed with '--install'")
+
+    api = detect_api(CONFIG)
+    print("Detected API v{version}".format(version=api))
+
+    config = load_config(run_config)
+    if api is Api.V2:
+        run_api_v2(config)
+    elif api is Api.V3:
+        run_api_v3(config, settings_dir)
 
 
 def run_api_v2(config):
@@ -283,7 +317,7 @@ def execSelfControl(config, arguments):
     return output
 
 
-def install(config):
+def install(config, settings_dir):
     """ installs auto-selfcontrol """
     print("> Start installation of Auto-SelfControl")
 
@@ -301,6 +335,13 @@ def install(config):
         myfile.write(launchplist_script)
 
     subprocess.call(["launchctl", "load", "-w", launchplist_path])
+
+    print("> Save run configuration")
+    if not os.path.exists(settings_dir):
+        os.makedirs(settings_dir)
+
+    with open("{dir}/run_config.json".format(dir=settings_dir), 'w') as fp:
+        fp.write(json.dumps(config))
 
     print("> Installed\n")
 
@@ -366,10 +407,6 @@ def exit_with_error(message):
 
 
 if __name__ == "__main__":
-    CONFIG_DIRS = [
-        os.path.join(SETTINGS_DIR),
-        os.path.dirname(os.path.realpath(__file__))
-    ]
     sys.excepthook = excepthook
 
     syslog.openlog("Auto-SelfControl")
@@ -384,33 +421,17 @@ if __name__ == "__main__":
                       dest="run", default=False)
     (OPTS, ARGS) = PARSER.parse_args()
 
-    CONFIG_FILES = filter(lambda p: os.path.exists(p), map(
-        lambda d: os.path.join(d, 'config.json'), CONFIG_DIRS))
-
-    if len(CONFIG_FILES) is 0:
-        exit_with_error(
-            "There was no config file found, please create a config file.")
-
-    if len(CONFIG_FILES) > 1:
-        print("> Multiple config files were found, use config file with path: {path}".format(
-            path=CONFIG_FILES[0]))
-
-    CONFIG = load_config(CONFIG_FILES[0])
-
-    api = detect_api(CONFIG)
-    print("Detected API v{version}".format(version=api))
-
-    if not os.path.exists(SETTINGS_DIR):
-        os.makedirs(SETTINGS_DIR)
-
     if OPTS.run:
-        if api is Api.V2:
-            run_api_v2(CONFIG)
-        elif api is Api.V3:
-            run_api_v3(CONFIG, SETTINGS_DIR)
+        run(SETTINGS_DIR)
     else:
+        CONFIG_FILE = find_config()
+        CONFIG = load_config(CONFIG_FILE)
+
+        api = detect_api(CONFIG)
+        print("Detected API v{version}".format(version=api))
+
         check_config(CONFIG)
-        install(CONFIG)
+        install(CONFIG, SETTINGS_DIR)
         if api is Api.V3 and \
             not check_if_running(api, CONFIG) and \
                 any(s for s in CONFIG["block-schedules"] if is_schedule_active(s)):
