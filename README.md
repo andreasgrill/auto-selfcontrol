@@ -58,6 +58,7 @@ To remove the application (if installed with Homebrew):
 Or, manually, by removing the directory where you installed the files.
 
     sudo unlink /usr/local/bin/auto-selfcontrol
+    sudo rm -rf /usr/local/etc/auto-selfcontrol
     rm -rf ~/auto-selfcontrol
 
 You also need to remove the automatic schedule by executing the following command in the Terminal:
