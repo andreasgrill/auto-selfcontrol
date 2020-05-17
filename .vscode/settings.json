@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "/usr/bin/python",
+    "python.formatting.provider": "autopep8"
+}
