@@ -6,7 +6,7 @@ import json
 import time
 from datetime import datetime
 import plistlib
-import syslog
+import logging.handlers
 import traceback
 import sys
 import re
@@ -15,6 +15,14 @@ from pwd import getpwnam
 from optparse import OptionParser
 
 SETTINGS_DIR = '/usr/local/etc/auto-selfcontrol'
+
+# Configure global logger
+LOGGER = logging.getLogger("Auto-SelfControl")
+LOGGER.setLevel(logging.INFO)
+handler = logging.handlers.SysLogHandler('/var/run/syslog')
+handler.setFormatter(logging.Formatter(
+    '%(name)s: [%(levelname)s] %(message)s'))
+LOGGER.addHandler(handler)
 
 
 class Api:
@@ -59,7 +67,7 @@ def detect_api(config):
     try:
         output = execSelfControl(config, ["--version"])
         m = re.search(
-            get_selfcontrol_out_pattern(r'(\d+)\.\d+\.\d+'), output, re.MULTILINE)
+            get_selfcontrol_out_pattern(r'(\d+)\.\d+(\.\d+)*'), output, re.MULTILINE)
         if m is None:
             exit_with_error("Could not parse SelfControl version response!")
         if m and int(m.groups()[0]) >= Api.V3:
@@ -77,12 +85,12 @@ def run(settings_dir):
     run_config = "{path}/run_config.json".format(path=settings_dir)
     if not os.path.exists(run_config):
         exit_with_error(
-            "Run config file could not be found in installation location, please make sure that you have Auto-SelfControl installed with '--install'")
-
-    api = detect_api(CONFIG)
-    print("Detected API v{version}".format(version=api))
+            "Run config file could not be found in installation location, please make sure that you have Auto-SelfControl activated/installed")
 
     config = load_config(run_config)
+    api = detect_api(config)
+    print("> Detected API v{version}".format(version=api))
+
     if api is Api.V2:
         run_api_v2(config)
     elif api is Api.V3:
@@ -94,8 +102,8 @@ def run_api_v2(config):
 
     if check_if_running(Api.V2, config):
         print "SelfControl is already running, exit"
-        syslog.syslog(
-            syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
+        LOGGER.error(
+            "SelfControl is already running, ignore current execution of Auto-SelfControl.")
         exit(2)
 
     try:
@@ -103,8 +111,8 @@ def run_api_v2(config):
             s for s in config["block-schedules"] if is_schedule_active(s))
     except StopIteration:
         print("No Schedule is active at the moment.")
-        syslog.syslog(syslog.LOG_ALERT,
-                      "No schedule is active at the moment. Shutting down.")
+        LOGGER.warn(
+            "No schedule is active at the moment. Shutting down.")
         exit(0)
 
     duration = get_duration_minutes(
@@ -130,8 +138,8 @@ def run_api_v2(config):
     # Start SelfControl
     execSelfControl(config, ["--install"])
 
-    syslog.syslog(syslog.LOG_ALERT,
-                  "SelfControl started for {min} minute(s).".format(min=duration))
+    LOGGER.info(
+        "SelfControl started for {min} minute(s).".format(min=duration))
 
 
 def run_api_v3(config, settings_dir):
@@ -139,8 +147,8 @@ def run_api_v3(config, settings_dir):
 
     if check_if_running(Api.V3, config):
         print "SelfControl is already running, exit"
-        syslog.syslog(
-            syslog.LOG_ALERT, "SelfControl is already running, ignore current execution of Auto-SelfControl.")
+        LOGGER.error(
+            "SelfControl is already running, ignore current execution of Auto-SelfControl.")
         exit(2)
 
     try:
@@ -148,8 +156,7 @@ def run_api_v3(config, settings_dir):
             s for s in config["block-schedules"] if is_schedule_active(s))
     except StopIteration:
         print("No Schedule is active at the moment.")
-        syslog.syslog(syslog.LOG_ALERT,
-                      "No schedule is active at the moment. Shutting down.")
+        LOGGER.warn("No schedule is active at the moment. Shutting down.")
         exit(0)
 
     block_end_date = get_end_date_of_schedule(schedule)
@@ -160,8 +167,8 @@ def run_api_v3(config, settings_dir):
     # Start SelfControl
     execSelfControl(config, ["--install", blocklist_path, block_end_date])
 
-    syslog.syslog(syslog.LOG_ALERT,
-                  "SelfControl started until {end} minute(s).".format(end=block_end_date))
+    LOGGER.info("SelfControl started until {end} minute(s).".format(
+        end=block_end_date))
 
 
 def get_selfcontrol_out_pattern(content_pattern):
@@ -373,7 +380,7 @@ def check_config(config):
         msg = "It is not recommended to directly use SelfControl's blacklist. Please use the 'host-blacklist' " \
               "setting instead."
         print(msg)
-        syslog.syslog(syslog.LOG_WARNING, msg)
+        LOGGER.warn(msg)
 
 
 def update_blocklist(blocklist_path, config, schedule):
@@ -395,12 +402,12 @@ def excepthook(excType, excValue, tb):
     """ This function is called whenever an exception is not caught. """
     err = "Uncaught exception:\n{}\n{}\n{}".format(str(excType), excValue,
                                                    "".join(traceback.format_exception(excType, excValue, tb)))
-    syslog.syslog(syslog.LOG_CRIT, err)
+    LOGGER.error(err)
     print(err)
 
 
 def exit_with_error(message):
-    syslog.syslog(syslog.LOG_CRIT, message)
+    LOGGER.error(message)
     print("ERROR:")
     print(message)
     exit(1)
@@ -408,8 +415,6 @@ def exit_with_error(message):
 
 if __name__ == "__main__":
     sys.excepthook = excepthook
-
-    syslog.openlog("Auto-SelfControl")
 
     if os.geteuid() != 0:
         exit_with_error("Please make sure to run the script with elevated \
@@ -426,16 +431,17 @@ if __name__ == "__main__":
     else:
         CONFIG_FILE = find_config()
         CONFIG = load_config(CONFIG_FILE)
+        check_config(CONFIG)
 
         api = detect_api(CONFIG)
-        print("Detected API v{version}".format(version=api))
+        print("> Detected API v{version}".format(version=api))
 
-        check_config(CONFIG)
         install(CONFIG, SETTINGS_DIR)
-        if api is Api.V3 and \
-            not check_if_running(api, CONFIG) and \
-                any(s for s in CONFIG["block-schedules"] if is_schedule_active(s)):
+        schedule_is_active = any(
+            s for s in CONFIG["block-schedules"] if is_schedule_active(s))
+
+        if schedule_is_active and not check_if_running(api, CONFIG):
             print("> Active schedule found for SelfControl!")
             print("> Start SelfControl (this could take a few minutes)\n")
-            run_api_v2(CONFIG)
+            run(SETTINGS_DIR)
             print("\n> SelfControl was started.\n")
