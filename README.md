@@ -9,42 +9,56 @@ You can plan for every weekday if and when SelfControl should start and stop.
 
 ## Installation
 
-### With Homebrew
+### With Homebrew (recommended)
 
 The easiest way to install Auto-SelfControl is with [Homebrew](https://brew.sh/). Install Auto-SelfControl by running the following command in the Terminal:
 
+```bash
     brew tap andreasgrill/utils
     brew install auto-selfcontrol
+```
 
 If you already have [SelfControl](http://selfcontrolapp.com), start it and **backup your blacklist** as it might get overridden by Auto-SelfControl. 
 
 If you do not have [SelfControl](http://selfcontrolapp.com) already installed on your system, you can install it with [Homebrew Cask](https://caskroom.github.io/):
 
+```bash
     brew cask install selfcontrol
+```
 
 ### Manual installation
 
 Download this repository to a directory on your system (e.g., `~/auto-selfcontrol/`).
 
+```bash
     chmod +x auto-selfcontrol
+```
 
 Run from this specific repository
 
+```bash
     ./auto-selfcontrol <config|activate|help>
+```
 
 Optionally create a symlink in your `/usr/local/bin` folder to access it from anywhere:
 
+```bash
     sudo ln -s ./auto-selfcontrol /usr/local/bin/auto-selfcontrol 
+```
 
 ## Usage
 
 Edit the time configuration (see [Configuration](#configuration)) first:
 
+```bash
     auto-selfcontrol config
+```
 
 When your block-schedule in [config.json](config.json) is ready, activate it by running:
 
+```bash
     auto-selfcontrol activate
+```
 
 __Important:__ If you change [config.json](config.json) later, you have to call the `auto-selfcontrol activate` command again or Auto-SelfControl will not take the modifications into account!
 
@@ -53,21 +67,37 @@ __Important:__ If you change [config.json](config.json) later, you have to call 
 
 To remove the application (if installed with Homebrew):
 
+```bash
     brew uninstall auto-selfcontrol
+```
 
 Or, manually, by removing the directory where you installed the files.
 
+```bash
     sudo unlink /usr/local/bin/auto-selfcontrol
     sudo rm -rf /usr/local/etc/auto-selfcontrol
     rm -rf ~/auto-selfcontrol
+```
 
 You also need to remove the automatic schedule by executing the following command in the Terminal:
 
+```bash
     sudo rm /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist
+```
+
+## Update
+
+If you use Homebrew you can simply update Auto-SelfControl with the following command:
+
+```bash
+    brew upgrade auto-selfcontrol
+```
+
+If you have installed Auto-SelfControl manually, you need to repeat the installation steps.
 
 ## Configuration
 The following listing shows an example config.json file that blocks every Monday from 9am to 5.30pm and on every Tuesday from 10am to 4pm:
-```
+```json
     {
         "username": "MY_USERNAME",
         "selfcontrol-path": "/Applications/SelfControl.app",
@@ -103,7 +133,7 @@ The following listing shows an example config.json file that blocks every Monday
     Please note that it is possible to create multiple schedules on the same day, as long as they are not overlapping. Have a look at the example below.
 
 The following listing shows another example that blocks twitter and reddit every Sunday from 11pm til Monday 5am, Monday from 9am until 7pm and Monday from 10pm to 11pm:
-```
+```json
     {
         "username": "MY_USERNAME",
         "selfcontrol-path": "/Applications/SelfControl.app",
@@ -143,7 +173,9 @@ The following listing shows another example that blocks twitter and reddit every
 
 If you've installed another version of Python (e.g., using Homebrew), you'll need to run Auto-SelfControl with the original Python installation from macOS:
 
+```bash
     sudo /usr/bin/python auto-selfcontrol.py
+```
 
 There are also other options, including installing `pyobjc` on your own Python version (`pip install pyobjc`). [See this thread for alternative solutions](https://stackoverflow.com/questions/1614648/importerror-no-module-named-foundation#1616361).
 
