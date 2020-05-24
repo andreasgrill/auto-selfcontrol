@@ -240,7 +240,7 @@ def get_end_date_of_schedule(schedule):
     ts = time.time()
     utc_offset = ((datetime.fromtimestamp(
         ts) - datetime.utcfromtimestamp(ts)).total_seconds()) / 3600
-    offset = str(int(utc_offset * 100)).zfill(4)
+    offset = str(int(abs(utc_offset * 100))).zfill(4)
     sign = "+" if utc_offset >= 0 else "-"
 
     return endtime.strftime("%Y.%m.%dT%H:%M:%S{sign}{offset}".format(sign=sign, offset=offset))
