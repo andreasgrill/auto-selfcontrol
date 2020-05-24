@@ -243,7 +243,7 @@ def get_end_date_of_schedule(schedule):
     offset = str(int(abs(utc_offset * 100))).zfill(4)
     sign = "+" if utc_offset >= 0 else "-"
 
-    return endtime.strftime("%Y.%m.%dT%H:%M:%S{sign}{offset}".format(sign=sign, offset=offset))
+    return endtime.strftime("%Y-%m-%dT%H:%M:%S{sign}{offset}".format(sign=sign, offset=offset))
 
 
 def get_schedule_weekdays(schedule):
