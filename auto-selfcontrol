@@ -39,11 +39,12 @@ if [[ $1 ]]; then
             echo "Opening $CONFIG_FILE"
             # Opening with default editor set as $EDITOR
             if [[ $EDITOR ]]; then
-                $EDITOR $CONFIG_FILE
+                sudo $EDITOR $CONFIG_FILE
             # Or with default GUI text editor (txt files > Open with...)
             else
-                open -t $CONFIG_FILE
+                osascript -e "do shell script \"open -t $CONFIG_FILE\" with administrator privileges"
             fi
+            echo "To apply the changed config, you need to run ${b}$(basename "$0") activate${n}"
             ;;
         # Install plist config
         activate|install)
