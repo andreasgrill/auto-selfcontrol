@@ -183,6 +183,7 @@ def check_if_running(api, config):
         defaults = get_selfcontrol_settings(username)
         return defaults.has_key("BlockStartedDate") and not NSDate.distantFuture().isEqualToDate_(defaults["BlockStartedDate"])
     elif api is Api.V3:
+        execSelfControl(config, ["--checkup"])
         output = execSelfControl(config, ["--is-running"])
         m = re.search(
             get_selfcontrol_out_pattern(r'(NO|YES)'), output, re.MULTILINE)
