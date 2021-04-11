@@ -20,7 +20,7 @@ If you already have [SelfControl](http://selfcontrolapp.com), start it and **bac
 
 If you do not have [SelfControl](http://selfcontrolapp.com) already installed on your system, you can install it with [Homebrew Cask](https://caskroom.github.io/):
 
-    brew cask install selfcontrol
+    brew install --cask selfcontrol
 
 ### Manual installation
 
