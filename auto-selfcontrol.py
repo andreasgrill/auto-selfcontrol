@@ -45,28 +45,6 @@ def load_config(path):
     return config
 
 
-def find_config():
-    """Looks for the config.json and returns its path"""
-    local_config_file = "{path}/config.json".format(
-        path=os.path.dirname(os.path.realpath(__file__)))
-    global_config_file = "{path}/config.json".format(
-        path=SETTINGS_DIR)
-    prev_global_config_file = "{path}/config.json".format(
-        path='/usr/local/etc/auto-selfcontrol')
-
-    if os.path.exists(local_config_file):
-        return local_config_file
-
-    if os.path.exists(global_config_file):
-        return global_config_file
-
-    if os.path.exists(prev_global_config_file):
-        return prev_global_config_file
-
-    exit_with_error(
-        "There was no config file found, please create a config file.")
-
-
 def detect_api(config):
     """Return the supported API version of the SelfControl"""
     try:
@@ -281,7 +259,7 @@ def get_selfcontrol_settings(username):
     return result
 
 
-def get_launchscript(config):
+def get_launchscript(config, settings_dir):
     """Return the string of the launchscript."""
     return '''<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -293,7 +271,9 @@ def get_launchscript(config):
         <array>
             <string>/usr/bin/python</string>
             <string>{path}</string>
-            <string>-r</string>
+            <string>--run</string>
+            <string>--dir</string>
+            <string>{dir}</string>
         </array>
         <key>StartCalendarInterval</key>
         <array>
@@ -301,7 +281,7 @@ def get_launchscript(config):
         <key>RunAtLoad</key>
         <true/>
     </dict>
-    </plist>'''.format(path=os.path.realpath(__file__), startintervals="".join(get_launchscript_startintervals(config)))
+    </plist>'''.format(path=os.path.realpath(__file__), startintervals="".join(get_launchscript_startintervals(config)), dir=settings_dir)
 
 
 def get_launchscript_startintervals(config):
@@ -341,7 +321,7 @@ def install(config, settings_dir):
         subprocess.call(["launchctl", "unload", "-w", launchplist_path])
         os.unlink(launchplist_path)
 
-    launchplist_script = get_launchscript(config)
+    launchplist_script = get_launchscript(config, settings_dir)
 
     with open(launchplist_path, 'w') as myfile:
         myfile.write(launchplist_script)
@@ -429,24 +409,35 @@ if __name__ == "__main__":
     PARSER = OptionParser()
     PARSER.add_option("-r", "--run", action="store_true",
                       dest="run", default=False)
+    PARSER.add_option("-i", "--install", action="store_true",
+                      dest="install", default=False)
+    PARSER.add_option("-d", "--dir", action="store",
+                      dest="dir", default=SETTINGS_DIR)
     (OPTS, ARGS) = PARSER.parse_args()
 
     if OPTS.run:
-        run(SETTINGS_DIR)
-    else:
-        CONFIG_FILE = find_config()
+        run(OPTS.dir)
+    elif OPTS.install:
+        CONFIG_FILE = "{path}/config.json".format(path=OPTS.dir)
+        if not os.path.exists(CONFIG_FILE):
+            exit_with_error(
+                "There was no config file found in {dir}, please create a config file.".format(dir=OPTS.dir))
+
         CONFIG = load_config(CONFIG_FILE)
         check_config(CONFIG)
 
         api = detect_api(CONFIG)
         print("> Detected API v{version}".format(version=api))
 
-        install(CONFIG, SETTINGS_DIR)
+        install(CONFIG, OPTS.dir)
         schedule_is_active = any(
             s for s in CONFIG["block-schedules"] if is_schedule_active(s))
 
         if schedule_is_active and not check_if_running(api, CONFIG):
             print("> Active schedule found for SelfControl!")
             print("> Start SelfControl (this could take a few minutes)\n")
-            run(SETTINGS_DIR)
+            run(OPTS.dir)
             print("\n> SelfControl was started.\n")
+    else:
+        exit_with_error(
+            "No action specified")
