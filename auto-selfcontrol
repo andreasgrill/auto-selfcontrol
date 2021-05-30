@@ -3,12 +3,17 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-# Check if auto-selfcontrol was installed through brew and set the config.json location accordingly
-if [[ $DIR == /usr/local/* ]]; then
-    mkdir -p /usr/local/etc/auto-selfcontrol || true
+# Check if config file already exists
+if [[ -d "$HOME/.config/auto-selfcontrol/" ]]; then
+    CONFIG_FILE="$HOME/.config/auto-selfcontrol/config.json"
+elif [ -f "/usr/local/etc/auto-selfcontrol/config.json" ]; then
     CONFIG_FILE="/usr/local/etc/auto-selfcontrol/config.json"
-else
+elif [ -f "$DIR/config.json" ]; then
     CONFIG_FILE="$DIR/config.json"
+else
+    # No config file found: create it in ~/.config/auto-selfcontrol/
+    mkdir -p "$HOME/.config/auto-selfcontrol/" || true
+    CONFIG_FILE="$HOME/.config/auto-selfcontrol/config.json"
 fi
 
 b=$(tput bold)

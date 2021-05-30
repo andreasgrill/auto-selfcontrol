@@ -14,7 +14,7 @@ from Foundation import NSUserDefaults, CFPreferencesSetAppValue, CFPreferencesAp
 from pwd import getpwnam
 from optparse import OptionParser
 
-SETTINGS_DIR = '/usr/local/etc/auto-selfcontrol'
+SETTINGS_DIR = os.path.expanduser("~") + '/.config/auto-selfcontrol'
 
 # Configure global logger
 LOGGER = logging.getLogger("Auto-SelfControl")
@@ -51,12 +51,17 @@ def find_config():
         path=os.path.dirname(os.path.realpath(__file__)))
     global_config_file = "{path}/config.json".format(
         path=SETTINGS_DIR)
+    prev_global_config_file = "{path}/config.json".format(
+        path='/usr/local/etc/auto-selfcontrol')
 
     if os.path.exists(local_config_file):
         return local_config_file
 
     if os.path.exists(global_config_file):
         return global_config_file
+
+    if os.path.exists(prev_global_config_file):
+        return prev_global_config_file
 
     exit_with_error(
         "There was no config file found, please create a config file.")
