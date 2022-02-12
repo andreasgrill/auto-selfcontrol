@@ -7,7 +7,7 @@ Small utility to schedule start and stop times of [SelfControl](http://selfcontr
 Auto-SelfControl helps you to create a weekly schedule for [SelfControl](http://selfcontrolapp.com).
 You can plan for every weekday if and when SelfControl should start and stop.
 
-> :warning: **Auto-SelfControl** is not compatible yet with SelfControl 4.
+> :warning: **Auto-SelfControl** is not compatible yet with macOS 12 and SelfControl 4.
 > We are trying to solve [the issue](https://github.com/andreasgrill/auto-selfcontrol/issues/64), but as of today Auto-SelfControl won't be able to schedule blocks.
 
 ## Installation
