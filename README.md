@@ -12,6 +12,11 @@ You can plan for every weekday if and when SelfControl should start and stop.
 
 ## Installation
 
+### Requirements
+
+- Python3 needs to be installed. Check by running the following command in your terminal: `python3 --version`. If Python3 is missing, you should be able to install it through the Xcode developer tools or [Homebrew](https://brew.sh/).
+- [SelfControl 4](http://selfcontrolapp.com)
+
 ### With Homebrew
 
 The easiest way to install Auto-SelfControl is with [Homebrew](https://brew.sh/). Install Auto-SelfControl by running the following command in the Terminal:
@@ -41,15 +46,33 @@ Optionally create a symlink in your `/usr/local/bin` folder to access it from an
 
 ## Usage
 
-Edit the time configuration (see [Configuration](#configuration)) first:
+1. Open the configuration file:
+
+To specify when and how Auto-SelfControl should activate, you need to configure a block-schedule in the following configuration file:
+
+    ~/.config/auto-selfcontrol/config.json
+
+You can also quickly access the configuration file through with the following command:
 
     auto-selfcontrol config
 
-When your block-schedule in [config.json](config.json) is ready, activate it by running:
+2. Configure the block schedules
+
+Check and update the configuration file:
+
+- Change the `username` to your current macOS User
+- Upda
+- Have a look at the [Configuration](#configuration) section
+
+3. Activate and apply the configuration
+
+Changes to the configuration file are not automatically applied. If you want Auto-SelfControl to apply the configuration, you can use the `activate` command:
 
     auto-selfcontrol activate
 
-**Important:** If you change [config.json](config.json) later, you have to call the `auto-selfcontrol activate` command again or Auto-SelfControl will not take the modifications into account!
+If there is an error in your configuration file, the output of the command should give you a hint where to look.
+
+**Important:** If you change your configuration file later, you have to call the `auto-selfcontrol activate` command again or Auto-SelfControl will ignore the modifications. However, changes to an already running block-schedule are ignored until the block-schedule is over.
 
 ## Uninstall
 
@@ -62,10 +85,11 @@ Or, manually, by removing the directory where you installed the files.
     sudo unlink /usr/local/bin/auto-selfcontrol
     sudo rm -rf /usr/local/etc/auto-selfcontrol
     rm -rf ~/auto-selfcontrol
+    rm -rf ~/.config/auto-selfcontrol
 
 You also need to remove the automatic schedule by executing the following command in the Terminal:
 
-    sudo rm /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist
+    sudo rm -f /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist
 
 ## Configuration
 
@@ -143,13 +167,3 @@ The following listing shows another example that blocks twitter and reddit every
         ]
     }
 ```
-
-## Troubleshooting
-
-### ImportError: No module named Foundation
-
-If you've installed another version of Python (e.g., using Homebrew), you'll need to run Auto-SelfControl with the original Python installation from macOS:
-
-    sudo /usr/bin/python auto-selfcontrol.py
-
-There are also other options, including installing `pyobjc` on your own Python version (`pip install pyobjc`). [See this thread for alternative solutions](https://stackoverflow.com/questions/1614648/importerror-no-module-named-foundation#1616361).

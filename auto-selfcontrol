@@ -32,6 +32,13 @@ where:
 
 More instructions at https://github.com/andreasgrill/auto-selfcontrol"
 
+# Check if python3 was found
+/usr/bin/python3 --version > /dev/null 2>&1
+if [ "$?" -ne 0 ]; then
+    >&2 echo "ERROR: Python3 was not found. Please install python3, e.g.: brew install python3"
+    exit 1
+fi
+
 if [[ $1 ]]; then
     case "$1" in
         # Edit configuration file
@@ -52,7 +59,7 @@ if [[ $1 ]]; then
             ;;
         # Install plist config
         activate|install)
-            sudo /usr/bin/python $DIR/auto-selfcontrol.py --install --dir "$(dirname $CONFIG_FILE)"
+            sudo /usr/bin/python3 $DIR/auto-selfcontrol.py --install --dir "$(dirname $CONFIG_FILE)"
             exit 0
             ;;
         -h|--help|help|*)
