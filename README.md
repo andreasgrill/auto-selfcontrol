@@ -3,9 +3,12 @@
 Small utility to schedule start and stop times of [SelfControl](http://selfcontrolapp.com).
 
 ## What is it for?
+
 Auto-SelfControl helps you to create a weekly schedule for [SelfControl](http://selfcontrolapp.com).
 You can plan for every weekday if and when SelfControl should start and stop.
 
+> :warning: **Auto-SelfControl** is not compatible yet with SelfControl 4.
+> We are trying to solve [the issue](https://github.com/andreasgrill/auto-selfcontrol/issues/64), but as of today Auto-SelfControl won't be able to schedule blocks.
 
 ## Installation
 
@@ -16,7 +19,7 @@ The easiest way to install Auto-SelfControl is with [Homebrew](https://brew.sh/)
     brew tap andreasgrill/utils
     brew install auto-selfcontrol
 
-If you already have [SelfControl](http://selfcontrolapp.com), start it and **backup your blacklist** as it might get overridden by Auto-SelfControl. 
+If you already have [SelfControl](http://selfcontrolapp.com), start it and **backup your blacklist** as it might get overridden by Auto-SelfControl.
 
 If you do not have [SelfControl](http://selfcontrolapp.com) already installed on your system, you can install it with [Homebrew Cask](https://caskroom.github.io/):
 
@@ -34,7 +37,7 @@ Run from this specific repository
 
 Optionally create a symlink in your `/usr/local/bin` folder to access it from anywhere:
 
-    sudo ln -s ./auto-selfcontrol /usr/local/bin/auto-selfcontrol 
+    sudo ln -s ./auto-selfcontrol /usr/local/bin/auto-selfcontrol
 
 ## Usage
 
@@ -46,8 +49,7 @@ When your block-schedule in [config.json](config.json) is ready, activate it by 
 
     auto-selfcontrol activate
 
-__Important:__ If you change [config.json](config.json) later, you have to call the `auto-selfcontrol activate` command again or Auto-SelfControl will not take the modifications into account!
-
+**Important:** If you change [config.json](config.json) later, you have to call the `auto-selfcontrol activate` command again or Auto-SelfControl will not take the modifications into account!
 
 ## Uninstall
 
@@ -66,7 +68,9 @@ You also need to remove the automatic schedule by executing the following comman
     sudo rm /Library/LaunchDaemons/com.parrot-bytes.auto-selfcontrol.plist
 
 ## Configuration
+
 The following listing shows an example config.json file that blocks every Monday from 9am to 5.30pm and on every Tuesday from 10am to 4pm:
+
 ```
     {
         "username": "MY_USERNAME",
@@ -93,16 +97,19 @@ The following listing shows an example config.json file that blocks every Monday
         ]
     }
 ```
+
 - _username_ should be the macOS username.
 - _selfcontrol-path_ is the absolute path to [SelfControl](http://selfcontrolapp.com).
-- _host-blacklist_ contains the list of sites that should get blacklisted as a string array. Please note that the blacklist in SelfControl might get overridden and should be __backed up__ before using Auto-SelfControl.
+- _host-blacklist_ contains the list of sites that should get blacklisted as a string array. Please note that the blacklist in SelfControl might get overridden and should be **backed up** before using Auto-SelfControl.
 - _block-schedules_ contains a list of schedules when SelfControl should be started.
-    * The _weekday_ settings specifies the day of the week when SelfControl should get started. Possible values are from 1 (Monday) to 7 (Sunday). If the setting is `null` or omitted the blocking will be scheduled for all week days.
-    * _start-hour_ and _start-minute_ denote the time of the day when the blocking should start, while _end-hour_ and _end-minute_ specify the time it should end. The hours must be defined in the 24 hour digit format. If the ending time is before the start time, the block will last until the next day (see example below).
 
-    Please note that it is possible to create multiple schedules on the same day, as long as they are not overlapping. Have a look at the example below.
+  - The _weekday_ settings specifies the day of the week when SelfControl should get started. Possible values are from 1 (Monday) to 7 (Sunday). If the setting is `null` or omitted the blocking will be scheduled for all week days.
+  - _start-hour_ and _start-minute_ denote the time of the day when the blocking should start, while _end-hour_ and _end-minute_ specify the time it should end. The hours must be defined in the 24 hour digit format. If the ending time is before the start time, the block will last until the next day (see example below).
+
+  Please note that it is possible to create multiple schedules on the same day, as long as they are not overlapping. Have a look at the example below.
 
 The following listing shows another example that blocks twitter and reddit every Sunday from 11pm til Monday 5am, Monday from 9am until 7pm and Monday from 10pm to 11pm:
+
 ```
     {
         "username": "MY_USERNAME",
@@ -146,4 +153,3 @@ If you've installed another version of Python (e.g., using Homebrew), you'll nee
     sudo /usr/bin/python auto-selfcontrol.py
 
 There are also other options, including installing `pyobjc` on your own Python version (`pip install pyobjc`). [See this thread for alternative solutions](https://stackoverflow.com/questions/1614648/importerror-no-module-named-foundation#1616361).
-
