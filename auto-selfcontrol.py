@@ -24,12 +24,6 @@ handler.setFormatter(logging.Formatter(
     '%(name)s: [%(levelname)s] %(message)s'))
 LOGGER.addHandler(handler)
 
-
-class Api:
-    V2 = 2
-    V3 = 3
-
-
 def load_config(path):
     """Load a JSON configuration file"""
     config = dict()
@@ -44,25 +38,6 @@ def load_config(path):
 
     return config
 
-
-def detect_api(config):
-    """Return the supported API version of the SelfControl"""
-    try:
-        output = execSelfControl(config, ["--version"])
-        m = re.search(
-            get_selfcontrol_out_pattern(r'(\d+)\.\d+(\.\d+)*'), output, re.MULTILINE)
-        if m is None:
-            exit_with_error("Could not parse SelfControl version response!")
-        if m and int(m.groups()[0]) >= Api.V3:
-            return Api.V3
-
-        exit_with_error("Unexpected version returned from SelfControl '{version}'".format(
-            version=m.groups()[0]))
-    except:
-        # SelfControl < 3.0.0 does not support the --version argument
-        return Api.V2
-
-
 def run(settings_dir):
     """Load config and start SelfControl"""
     run_config = "{path}/run_config.json".format(path=settings_dir)
@@ -71,65 +46,11 @@ def run(settings_dir):
             "Run config file could not be found in installation location, please make sure that you have Auto-SelfControl activated/installed")
 
     config = load_config(run_config)
-    api = detect_api(config)
-    print("> Detected API v{version}".format(version=api))
 
-    if api is Api.V2:
-        run_api_v2(config)
-    elif api is Api.V3:
-        run_api_v3(config, settings_dir)
-
-
-def run_api_v2(config):
-    """Start SelfControl (< 3.0) with custom parameters, depending on the weekday and the config"""
-
-    if check_if_running(Api.V2, config):
-        print "SelfControl is already running, exit"
-        LOGGER.error(
-            "SelfControl is already running, ignore current execution of Auto-SelfControl.")
-        exit(2)
-
-    try:
-        schedule = next(
-            s for s in config["block-schedules"] if is_schedule_active(s))
-    except StopIteration:
-        print("No Schedule is active at the moment.")
-        LOGGER.warn(
-            "No schedule is active at the moment. Shutting down.")
-        exit(0)
-
-    duration = get_duration_minutes(
-        schedule["end-hour"], schedule["end-minute"])
-
-    set_selfcontrol_setting("BlockDuration", duration, config["username"])
-    set_selfcontrol_setting("BlockAsWhitelist", 1 if schedule.get("block-as-whitelist", False) else 0,
-                            config["username"])
-
-    if schedule.get("host-blacklist", None) is not None:
-        set_selfcontrol_setting(
-            "HostBlacklist", schedule["host-blacklist"], config["username"])
-    elif config.get("host-blacklist", None) is not None:
-        set_selfcontrol_setting(
-            "HostBlacklist", config["host-blacklist"], config["username"])
-
-    # In legacy mode manually set the BlockStartedDate, this should not be required anymore in future versions
-    # of SelfControl.
-    if config.get("legacy-mode", True):
-        set_selfcontrol_setting(
-            "BlockStartedDate", NSDate.date(), config["username"])
-
-    # Start SelfControl
-    execSelfControl(config, ["--install"])
-
-    LOGGER.info(
-        "SelfControl started for {min} minute(s).".format(min=duration))
-
-
-def run_api_v3(config, settings_dir):
     """Start SelfControl with custom parameters, depending on the weekday and the config"""
 
-    if check_if_running(Api.V3, config):
-        print "SelfControl is already running, exit"
+    if check_if_running(config):
+        print("SelfControl is already running, exit")
         LOGGER.error(
             "SelfControl is already running, ignore current execution of Auto-SelfControl.")
         exit(2)
@@ -159,22 +80,14 @@ def get_selfcontrol_out_pattern(content_pattern):
     return r'^.*org\.eyebeam\.SelfControl[^ ]+\s*' + content_pattern + r'\s*$'
 
 
-def check_if_running(api, config):
+def check_if_running(config):
     """Check if SelfControl is already running."""
-    if api is Api.V2:
-        username = config["username"]
-        defaults = get_selfcontrol_settings(username)
-        return defaults.has_key("BlockStartedDate") and not NSDate.distantFuture().isEqualToDate_(defaults["BlockStartedDate"])
-    elif api is Api.V3:
-        output = execSelfControl(config, ["--is-running"])
-        m = re.search(
-            get_selfcontrol_out_pattern(r'(NO|YES)'), output, re.MULTILINE)
-        if m is None:
-            exit_with_error("Could not detect if SelfControl is running.")
-        return m.groups()[0] != 'NO'
-    else:
-        raise Exception(
-            "Unknown API version {version} passed.".format(version=api))
+    output = execSelfControl(config, ["--is-running"]).decode('UTF-8')
+    m = re.search(
+        get_selfcontrol_out_pattern(r'(NO|YES)'), output, re.MULTILINE)
+    if m is None:
+        exit_with_error("Could not detect if SelfControl is running.")
+    return m.groups()[0] != 'NO'
 
 
 def is_schedule_active(schedule):
@@ -204,16 +117,6 @@ def is_schedule_active(schedule):
 
     return False
 
-
-def get_duration_minutes(endhour, endminute):
-    """Return the minutes left until the schedule's end-hour and end-minute are reached."""
-    currenttime = datetime.today()
-    endtime = datetime(
-        currenttime.year, currenttime.month, currenttime.day, endhour, endminute)
-    d = endtime - currenttime
-    return int(round(d.seconds / 60.0))
-
-
 def get_end_date_of_schedule(schedule):
     """Return the end date of the provided schedule in ISO 8601 format"""
     currenttime = datetime.today()
@@ -232,31 +135,6 @@ def get_end_date_of_schedule(schedule):
 def get_schedule_weekdays(schedule):
     """Return a list of weekdays the specified schedule is active."""
     return [schedule["weekday"]] if schedule.get("weekday", None) is not None else range(1, 8)
-
-
-def set_selfcontrol_setting(key, value, username):
-    """Set a single default setting of SelfControl for the provided username."""
-    NSUserDefaults.resetStandardUserDefaults()
-    originalUID = os.geteuid()
-    os.seteuid(getpwnam(username).pw_uid)
-    CFPreferencesSetAppValue(key, value, "org.eyebeam.SelfControl")
-    CFPreferencesAppSynchronize("org.eyebeam.SelfControl")
-    NSUserDefaults.resetStandardUserDefaults()
-    os.seteuid(originalUID)
-
-
-def get_selfcontrol_settings(username):
-    """Return all default settings of SelfControl for the provided username."""
-    NSUserDefaults.resetStandardUserDefaults()
-    originalUID = os.geteuid()
-    os.seteuid(getpwnam(username).pw_uid)
-    defaults = NSUserDefaults.standardUserDefaults()
-    defaults.addSuiteNamed_("org.eyebeam.SelfControl")
-    defaults.synchronize()
-    result = defaults.dictionaryRepresentation()
-    NSUserDefaults.resetStandardUserDefaults()
-    os.seteuid(originalUID)
-    return result
 
 
 def get_launchscript(config, settings_dir):
@@ -340,15 +218,15 @@ def install(config, settings_dir):
 
 def check_config(config):
     """ checks whether the config file is correct """
-    if not config.has_key("username"):
+    if "username" not in config:
         exit_with_error("No username specified in config.")
-    if config["username"] not in get_osx_usernames():
+    if config["username"].encode('UTF-8') not in get_osx_usernames():
         exit_with_error(
             "Username '{username}' unknown.\nPlease use your OSX username instead.\n"
             "If you have trouble finding it, just enter the command 'whoami'\n"
             "in your terminal.".format(
                 username=config["username"]))
-    if not config.has_key("selfcontrol-path"):
+    if "selfcontrol-path" not in config:
         exit_with_error(
             "The setting 'selfcontrol-path' is required and must point to the location of SelfControl.")
     if not os.path.exists(config["selfcontrol-path"]):
@@ -356,7 +234,7 @@ def check_config(config):
             "The setting 'selfcontrol-path' does not point to the correct location of SelfControl. "
             "Please make sure to use an absolute path and include the '.app' extension, "
             "e.g. /Applications/SelfControl.app")
-    if not config.has_key("block-schedules"):
+    if "block-schedules" not in config:
         exit_with_error("The setting 'block-schedules' is required.")
     if len(config["block-schedules"]) == 0:
         exit_with_error("You need at least one schedule in 'block-schedules'.")
@@ -375,7 +253,7 @@ def update_blocklist(blocklist_path, config, schedule):
         "BlockAsWhitelist": schedule.get("block-as-whitelist", False)
     }
     with open(blocklist_path, 'wb') as fp:
-        plistlib.writePlist(plist, fp)
+        plistlib.dump(plist, fp)
 
 
 def get_osx_usernames():
@@ -426,14 +304,11 @@ if __name__ == "__main__":
         CONFIG = load_config(CONFIG_FILE)
         check_config(CONFIG)
 
-        api = detect_api(CONFIG)
-        print("> Detected API v{version}".format(version=api))
-
         install(CONFIG, OPTS.dir)
         schedule_is_active = any(
             s for s in CONFIG["block-schedules"] if is_schedule_active(s))
 
-        if schedule_is_active and not check_if_running(api, CONFIG):
+        if schedule_is_active and not check_if_running(CONFIG):
             print("> Active schedule found for SelfControl!")
             print("> Start SelfControl (this could take a few minutes)\n")
             run(OPTS.dir)
