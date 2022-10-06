@@ -7,23 +7,10 @@ Small utility to schedule start and stop times of [SelfControl](http://selfcontr
 Auto-SelfControl helps you to create a weekly schedule for [SelfControl](http://selfcontrolapp.com).
 You can plan for every weekday if and when SelfControl should start and stop.
 
-> :warning: **Auto-SelfControl** is not compatible yet with macOS 12 and SelfControl 4.
-> We are trying to solve [the issue](https://github.com/andreasgrill/auto-selfcontrol/issues/64), but as of today Auto-SelfControl won't be able to schedule blocks.
+> :warning: **Auto-SelfControl** is only compatible with macOS 12 and SelfControl 4.
+> This is a fork of https://github.com/andreasgrill/auto-selfcontrol/.
 
 ## Installation
-
-### With Homebrew
-
-The easiest way to install Auto-SelfControl is with [Homebrew](https://brew.sh/). Install Auto-SelfControl by running the following command in the Terminal:
-
-    brew tap andreasgrill/utils
-    brew install auto-selfcontrol
-
-If you already have [SelfControl](http://selfcontrolapp.com), start it and **backup your blacklist** as it might get overridden by Auto-SelfControl.
-
-If you do not have [SelfControl](http://selfcontrolapp.com) already installed on your system, you can install it with [Homebrew Cask](https://caskroom.github.io/):
-
-    brew install --cask selfcontrol
 
 ### Manual installation
 
@@ -52,10 +39,6 @@ When your block-schedule in [config.json](config.json) is ready, activate it by 
 **Important:** If you change [config.json](config.json) later, you have to call the `auto-selfcontrol activate` command again or Auto-SelfControl will not take the modifications into account!
 
 ## Uninstall
-
-To remove the application (if installed with Homebrew):
-
-    brew uninstall auto-selfcontrol
 
 Or, manually, by removing the directory where you installed the files.
 
