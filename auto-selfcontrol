@@ -52,7 +52,7 @@ if [[ $1 ]]; then
             ;;
         # Install plist config
         activate|install)
-            sudo /usr/bin/python $DIR/auto-selfcontrol.py --install --dir "$(dirname $CONFIG_FILE)"
+            sudo python3 $DIR/auto-selfcontrol.py --install --dir "$(dirname $CONFIG_FILE)"
             exit 0
             ;;
         -h|--help|help|*)
