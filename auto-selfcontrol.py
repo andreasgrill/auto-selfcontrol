@@ -84,7 +84,7 @@ def run_api_v2(config):
     """Start SelfControl (< 3.0) with custom parameters, depending on the weekday and the config"""
 
     if check_if_running(Api.V2, config):
-        print "SelfControl is already running, exit"
+        print("SelfControl is already running, exit")
         LOGGER.error(
             "SelfControl is already running, ignore current execution of Auto-SelfControl.")
         exit(2)
@@ -129,7 +129,7 @@ def run_api_v3(config, settings_dir):
     """Start SelfControl with custom parameters, depending on the weekday and the config"""
 
     if check_if_running(Api.V3, config):
-        print "SelfControl is already running, exit"
+        print("SelfControl is already running, exit")
         LOGGER.error(
             "SelfControl is already running, ignore current execution of Auto-SelfControl.")
         exit(2)
