@@ -8,7 +8,7 @@ Auto-SelfControl helps you to create a weekly schedule for [SelfControl](http://
 You can plan for every weekday if and when SelfControl should start and stop.
 
 > :warning: **Auto-SelfControl** is not compatible SelfControl 4.
-> We are trying to solve [the issue](https://github.com/andreasgrill/auto-selfcontrol/issues/64), but as of today Auto-SelfControl won't be able to schedule blocks.
+> We are currently working on resolving [this issue](https://github.com/andreasgrill/auto-selfcontrol/issues/64). However, as of now, Auto-SelfControl cannot schedule blocks due to this problem. You might want to consider using [Hammer Control](https://github.com/Pandoks/hammer-control), which employs a different approach to address this issue.
 
 ## Installation
 
