@@ -41,7 +41,15 @@ def load_config(path):
         exit_with_error("The JSON config file {configfile} is not correctly formatted."
                         "The following exception was raised:\
                         \n{exc}".format(configfile=path, exc=exception))
-
+    if config.get("host-blacklist-paths",None) is not None:
+        # add to config["host-blacklist"] if it exists
+        blacklist = set(config["host-blacklist"]) if config.get("host-blacklist", None) is not None else set()
+        for blacklist_filename in config["host-blacklist-paths"]:
+            blacklist_location = os.path.realpath(os.path.join(os.getcwd(),blacklist_filename))
+            with open(blacklist_location,"rt") as bl:
+                for host in bl:
+                    blacklist.add(host.strip())
+        config["host-blacklist"] = list(blacklist)
     return config
 
 
@@ -230,8 +238,20 @@ def get_end_date_of_schedule(schedule):
 
 
 def get_schedule_weekdays(schedule):
+
     """Return a list of weekdays the specified schedule is active."""
-    return [schedule["weekday"]] if schedule.get("weekday", None) is not None else range(1, 8)
+    if schedule.get("weekday", None) is not None:
+        if schedule["weekday"] == "weekdays":
+            return range(1,6)
+        elif schedule["weekday"] == "weekends":
+            return range(6,8)
+        elif type(schedule["weekday"]) == list:
+            return schedule["weekday"]
+        elif type(schedule["weekday"]) == int:
+            return [schedule["weekday"]]
+    else:
+        return range(1,8)
+
 
 
 def set_selfcontrol_setting(key, value, username):
